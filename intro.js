@@ -143,7 +143,7 @@ export async function playIntro(el, getLive) {
       const head = new THREE.Mesh(new THREE.SphereGeometry(.014, 12, 10), m); head.position.y = h; g.add(head);
       const ring = new THREE.Mesh(new THREE.RingGeometry(.011, .017, 28), new THREE.MeshBasicMaterial({ color: col, transparent: true, side: THREE.DoubleSide, depthWrite: false })); ring.rotation.x = -Math.PI / 2; ring.position.y = .002; g.add(ring);
       const it = { e, geo, g, head, ring, h, born: .55 + idx * .05, yes, pct: Math.round(e.lead.yes * 100) };
-      if (tour.length < 3 && !tour.some(t => t.geo.name === geo.name)) {           // the stories the screen tours, with a label each
+      if (tour.length < 3 && e.lead.yes > .05 && e.lead.yes < .95 && !tour.some(t => t.geo.name === geo.name)) {           // the stories the screen tours, with a label each
         it.label = tag(geo.name.toUpperCase(), { size: 40, sub: `${it.pct}% yes · ${qOf(e).length > 28 ? qOf(e).slice(0, 27) + '…' : qOf(e)}`, subColor: yes ? BLUE : RED });
         it.label.center.set(0, 0); it.label.scale.set(.0001, .0001, 1); gs.add(it.label); tour.push(it);
       }
@@ -156,7 +156,7 @@ export async function playIntro(el, getLive) {
       pinsBig.userData.items = (pinsBig.userData.items || []).concat({ ring: br, ph: Math.random() });
     });
     // the orbits carry the numbers
-    const words = []; L.slice(0, 14).forEach(e => { const p = Math.round(e.lead.yes * 100); words.push([`YES ${p}%`, BLUE], [`NO ${100 - p}%`, RED]); });
+    const words = []; L.filter(e => e.lead.yes > .03 && e.lead.yes < .97).slice(0, 14).forEach(e => { const p = Math.round(e.lead.yes * 100); words.push([`YES ${p}%`, BLUE], [`NO ${100 - p}%`, RED]); });
     orbits.forEach((g, k) => { for (let i = 0; i < 9; i++) { const [w, c] = words[(i * 2 + k * 9) % words.length] || ['YES', BLUE]; const s = tag(w, { size: 46, color: c }); s.scale.set(.42 * s.userData.aspect, .42, 1); g.add(s); orbitTags.push({ s, g, a: i / 9 * Math.PI * 2, sp: k ? -.11 : .14 }); } });
     // numbers that rise off the pins on the screen
     for (let i = 0; i < 14; i++) { const it = (pins.userData.items || [])[i % Math.max(1, (pins.userData.items || []).length)]; if (!it) break; const s = tag(`${it.pct}%`, { size: 40, color: it.yes ? BLUE : RED, bg: 'rgba(251,250,246,.0)' }); s.scale.set(.0001, .0001, 1); gs.add(s); risers.push({ s, it, ph: i * .37 }); }
