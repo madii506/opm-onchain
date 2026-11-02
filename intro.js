@@ -1,7 +1,7 @@
 // The way in. It opens high over the world: a dotted planet with every live question pinned in the city it's
 // happening in, rings of odds in orbit, and a beige PC standing on top of it all. The camera comes down to the PC,
-// whose screen shows the same world; a bet goes in and stamps. Then it swings to the front and throws you through a
-// tunnel of live numbers into the terminal.
+// whose screen shows the same world; a bet is typed in and goes through. Then it swings to the front and throws you
+// through a tunnel of live numbers into the terminal.
 // About 8.5 s, no captions. Click, tap, Esc, Enter or "skip" skips it. Once per session; ?intro forces it; ?introt=T freezes.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
@@ -26,6 +26,13 @@ const ll = (lat, lon, r = 1) => { const p = (90 - lat) * D, t = (lon + 180) * D;
 const INK = '#1d2233', BLUE = '#3f6dff', RED = '#e8483b', MUTE = '#6474a3', F = '"JetBrains Mono", monospace';
 function cv(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 function tx(c) { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; }
+function pill(name, val, col) {                          // a clean label: the place, then its odds
+  const c = cv(10, 10), g = c.getContext('2d'), fs = 40; g.font = `700 ${fs}px ${F}`; const a = g.measureText(name).width, b = g.measureText(val).width;
+  c.width = Math.ceil(a + b + fs * 1.9); c.height = Math.ceil(fs * 1.7); const h = c.height;
+  g.fillStyle = 'rgba(255,255,255,.96)'; g.beginPath(); g.roundRect(0, 0, c.width, h, h / 2); g.fill();
+  g.textBaseline = 'middle'; g.font = `700 ${fs}px ${F}`; g.fillStyle = INK; g.fillText(name, fs * .6, h / 2 + 2); g.fillStyle = col; g.fillText(val, fs * 1.3 + a, h / 2 + 2);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tx(c), transparent: true, depthWrite: false, toneMapped: false })); s.userData.aspect = c.width / c.height; return s;
+}
 function tag(text, { size = 44, color = INK, bg = 'rgba(251,250,246,.94)', sub = '', subColor = BLUE } = {}) {   // a little label card, as a sprite
   const c = cv(10, 10), g = c.getContext('2d'); g.font = `700 ${size}px ${F}`; const w1 = g.measureText(text).width; g.font = `700 ${size * .8}px ${F}`; const w2 = sub ? g.measureText(sub).width : 0;
   c.width = Math.ceil(Math.max(w1, w2) + size * .9); c.height = Math.ceil(size * (sub ? 2.5 : 1.55)); const h = c.height;
@@ -36,7 +43,7 @@ function tag(text, { size = 44, color = INK, bg = 'rgba(251,250,246,.94)', sub =
 }
 
 // the timeline (seconds)
-const T_NEAR = 3.4, T_BET = 3.5, T_STAMP = 4.2, T_TERM = 5.15, T_ALIGN = 6.55, T_DIVE = 7.15, T_END = 8.35;
+const T_NEAR = 3.4, T_BET = 3.5, T_STAMP = 4.25, T_TERM = 5.15, T_ALIGN = 6.55, T_DIVE = 7.15, T_END = 8.35;
 
 export async function playIntro(el, getLive) {
   try { sessionStorage.setItem('opm:intro', '1'); } catch {}
@@ -77,7 +84,7 @@ export async function playIntro(el, getLive) {
   sg.computeVertexNormals();
   const S = cv(1024, 768), sx = S.getContext('2d'), scrTex = tx(S);
   const rtW = small ? 1024 : 1440, rt = new THREE.WebGLRenderTarget(rtW, rtW * .75, { samples: 4 });
-  const scrMat = new THREE.MeshBasicMaterial({ map: scrTex, toneMapped: false, color: new THREE.Color(.92, .92, .92) });
+  const scrMat = new THREE.MeshBasicMaterial({ map: scrTex, toneMapped: false, color: new THREE.Color(.93, .93, .93) });
   const screen = new THREE.Mesh(sg, scrMat); screen.position.set(0, .335, .118); mon.add(screen);
   const O = cv(1024, 768), ox = O.getContext('2d'), ovTex = tx(O);                 // the prompt and the stamp, over the globe
   const over = new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ map: ovTex, transparent: true, toneMapped: false, depthWrite: false })); over.position.set(0, .335, .1195); mon.add(over);
@@ -111,20 +118,16 @@ export async function playIntro(el, getLive) {
   });
 
   // ---------------------------------------------------------------- the world on the screen (rendered into the screen's texture)
-  const gs = new THREE.Scene(); gs.background = new THREE.Color(0xeef2fd);
+  const gs = new THREE.Scene(); gs.background = new THREE.Color(0xf4f6fd);
   const gcam = new THREE.PerspectiveCamera(30, 4 / 3, .1, 50); gcam.position.set(0, 0, 3.75);
   const globe = new THREE.Group(); gs.add(globe);
   globe.add(new THREE.Mesh(new THREE.SphereGeometry(.994, 72, 54), new THREE.MeshBasicMaterial({ color: 0xf8faff })));
   const hc = cv(256, 256), hg = hc.getContext('2d'), gr = hg.createRadialGradient(128, 128, 0, 128, 128, 128);
   gr.addColorStop(0, 'rgba(63,109,255,0)'); gr.addColorStop(.74, 'rgba(63,109,255,0)'); gr.addColorStop(.775, 'rgba(63,109,255,.34)'); gr.addColorStop(.88, 'rgba(63,109,255,.07)'); gr.addColorStop(1, 'rgba(63,109,255,0)'); hg.fillStyle = gr; hg.fillRect(0, 0, 256, 256);
   const ghalo = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(hc), depthWrite: false, transparent: true })); ghalo.scale.set(2.6, 2.6, 1); gs.add(ghalo);
-  const land = new THREE.InstancedMesh(new THREE.CircleGeometry(.0078, 6), new THREE.MeshBasicMaterial({ color: 0x2f3d73 }), cells.length);
+  const land = new THREE.InstancedMesh(new THREE.CircleGeometry(.0072, 8), new THREE.MeshBasicMaterial({ color: 0x3a4a85 }), cells.length);
   cells.forEach(([lat, lon], k) => { const p = ll(lat, lon, 1.001); o3.position.copy(p); o3.lookAt(p.clone().multiplyScalar(2)); o3.updateMatrix(); land.setMatrixAt(k, o3.matrix); }); globe.add(land);
-  const gmat = new THREE.LineBasicMaterial({ color: 0x3f6dff, transparent: true, opacity: .12 });
-  for (let lat = -60; lat <= 60; lat += 30) globe.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 96 }, (_, i) => ll(lat, i * 3.75, 1.002))), gmat));
-  for (let lon = -180; lon < 180; lon += 30) globe.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 61 }, (_, i) => ll(-90 + i * 3, lon, 1.002))), gmat));
   const pins = new THREE.Group(); globe.add(pins);
-  const risers = [];                                       // odds floating up off the pins
 
   // pins for both worlds, built as soon as the live questions are in
   let built = false, tour = [];
@@ -144,7 +147,7 @@ export async function playIntro(el, getLive) {
       const ring = new THREE.Mesh(new THREE.RingGeometry(.011, .017, 28), new THREE.MeshBasicMaterial({ color: col, transparent: true, side: THREE.DoubleSide, depthWrite: false })); ring.rotation.x = -Math.PI / 2; ring.position.y = .002; g.add(ring);
       const it = { e, geo, g, head, ring, h, born: .55 + idx * .05, yes, pct: Math.round(e.lead.yes * 100) };
       if (tour.length < 3 && e.lead.yes > .05 && e.lead.yes < .95 && !tour.some(t => t.geo.name === geo.name)) {           // the stories the screen tours, with a label each
-        it.label = tag(geo.name.toUpperCase(), { size: 40, sub: `${it.pct}% yes · ${qOf(e).length > 28 ? qOf(e).slice(0, 27) + '…' : qOf(e)}`, subColor: yes ? BLUE : RED });
+        it.label = pill(geo.name.toUpperCase(), `${it.pct}%`, yes ? BLUE : RED);
         it.label.center.set(0, 0); it.label.scale.set(.0001, .0001, 1); gs.add(it.label); tour.push(it);
       }
       pins.userData.items = (pins.userData.items || []).concat(it);
@@ -158,8 +161,6 @@ export async function playIntro(el, getLive) {
     // the orbits carry the numbers
     const words = []; L.filter(e => e.lead.yes > .03 && e.lead.yes < .97).slice(0, 14).forEach(e => { const p = Math.round(e.lead.yes * 100); words.push([`YES ${p}%`, BLUE], [`NO ${100 - p}%`, RED]); });
     orbits.forEach((g, k) => { for (let i = 0; i < 9; i++) { const [w, c] = words[(i * 2 + k * 9) % words.length] || ['YES', BLUE]; const s = tag(w, { size: 46, color: c }); s.scale.set(.42 * s.userData.aspect, .42, 1); g.add(s); orbitTags.push({ s, g, a: i / 9 * Math.PI * 2, sp: k ? -.11 : .14 }); } });
-    // numbers that rise off the pins on the screen
-    for (let i = 0; i < 14; i++) { const it = (pins.userData.items || [])[i % Math.max(1, (pins.userData.items || []).length)]; if (!it) break; const s = tag(`${it.pct}%`, { size: 40, color: it.yes ? BLUE : RED, bg: 'rgba(251,250,246,.0)' }); s.scale.set(.0001, .0001, 1); gs.add(s); risers.push({ s, it, ph: i * .37 }); }
   }
 
   // ---------------------------------------------------------------- light: a clear morning over the world
@@ -168,57 +169,41 @@ export async function playIntro(el, getLive) {
   Object.assign(key.shadow.camera, { left: -1.6, right: 1.6, top: 1.6, bottom: -1.6, near: .5, far: 16 }); key.shadow.radius = 5; key.shadow.bias = -.0005; scene.add(key);
   const glow = new THREE.PointLight(0x9fb4ff, .4, 1.6, 2); glow.position.set(0, .62, .7); scene.add(glow);
   const DUST = 260, dpos = new Float32Array(DUST * 3), dseed = new Float32Array(DUST);
-  for (let i = 0; i < DUST; i++) { dpos[i * 3] = -3 + Math.random() * 6; dpos[i * 3 + 1] = Math.random() * 3.2; dpos[i * 3 + 2] = -3 + Math.random() * 6; dseed[i] = Math.random() * 100; }
+  for (let i = 0; i < DUST; i++) { let x, y, z; do { x = -3 + Math.random() * 6; y = Math.random() * 3.2; z = -3 + Math.random() * 6; } while (Math.abs(x) < .75 && y < 1.3 && z > -.4 && z < 2.2); dpos[i * 3] = x; dpos[i * 3 + 1] = y; dpos[i * 3 + 2] = z; dseed[i] = Math.random() * 100; }   // never in front of the screen
   const dgeo = new THREE.BufferGeometry(); dgeo.setAttribute('position', new THREE.BufferAttribute(dpos, 3)); const base = dpos.slice();
   const dotT = tx((() => { const c = cv(32, 32), g = c.getContext('2d'), r = g.createRadialGradient(16, 16, 0, 16, 16, 16); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 32, 32); return c; })());
   const dust = new THREE.Points(dgeo, new THREE.PointsMaterial({ size: .03, map: dotT, transparent: true, opacity: .7, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })); scene.add(dust);
 
   // ---------------------------------------------------------------- what the screen shows
-  const NOISE = [0, 1, 2].map(() => { const c = cv(256, 192), g = c.getContext('2d'), d = g.createImageData(256, 192); for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255 | 0; d.data[i] = v; d.data[i + 1] = v; d.data[i + 2] = v + 10; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); return c; });
   let ST = null;
   const stories = () => { if (!ST) { const s = live().slice(0, 8).map(e => ({ q: qOf(e), yes: e.lead.yes })); if (s.length) ST = s; } return ST || [{ q: 'the world is placing its bets', yes: null }]; };
-  function overlay(T) {                                   // over the world: the bet typed in, then the stamp
+  function overlay(T) {                                   // over the world: one clean line, the bet typed in
     const g = ox, W = 1024, H = 768; g.clearRect(0, 0, W, H);
-    g.fillStyle = 'rgba(20,30,70,.03)'; for (let y = 0; y < H; y += 4) g.fillRect(0, y, W, 2);
-    g.font = `700 24px ${F}`; g.fillStyle = INK; g.fillText('opm', 46, 132); g.fillStyle = BLUE; g.fillRect(104, 112, 10, 24);
-    g.font = `400 21px ${F}`; g.fillStyle = MUTE; g.fillText('world · live', 128, 131);
-    if (Math.floor(T * 1.6) % 2 === 0) { g.fillStyle = RED; g.beginPath(); g.arc(W - 128, 124, 8, 0, 7); g.fill(); } g.font = `700 22px ${F}`; g.fillStyle = RED; g.fillText('LIVE', W - 112, 132);
-    if (T < T_BET - .25) { overTex(); return; }
-    const y = 590, cmd = 'opm bet --side yes --sol 0.5', t = T - T_BET, nn = t > 0 ? Math.floor(clamp(t / .62) * cmd.length) : 0, placed = T >= T_STAMP, a = clamp((T - T_BET + .25) / .25);
-    g.globalAlpha = a; g.fillStyle = 'rgba(251,252,255,.97)'; g.beginPath(); g.roundRect(44, y, W - 88, 92, 16); g.fill(); g.strokeStyle = placed ? BLUE : '#c9d3ef'; g.lineWidth = 4; g.stroke();
-    g.font = `400 36px ${F}`; g.fillStyle = MUTE; g.fillText('%', 72, y + 58); g.fillStyle = INK; const typed = cmd.slice(0, nn); g.fillText(typed, 118, y + 58);
-    if (!placed && Math.floor(T * 3) % 2 === 0) { g.fillStyle = BLUE; g.fillRect(124 + g.measureText(typed).width, y + 24, 19, 42); }
-    if (placed) { g.font = `700 34px ${F}`; g.fillStyle = BLUE; g.textAlign = 'right'; g.fillText('✓ placed', W - 72, y + 58); g.textAlign = 'left'; }
-    g.globalAlpha = 1;
-    if (placed) {
-      const k = clamp((T - T_STAMP) / .16), s = 2.6 - 1.6 * backOut(k);
-      g.save(); g.translate(W / 2, 360); g.rotate(-.12); g.scale(s * 1.2, s * 1.2); g.globalAlpha = clamp(k * 2.2) * .95;
-      g.fillStyle = 'rgba(251,252,255,.55)'; g.beginPath(); g.roundRect(-250, -86, 500, 172, 18); g.fill();
-      g.strokeStyle = BLUE; g.lineWidth = 10; g.beginPath(); g.roundRect(-250, -86, 500, 172, 18); g.stroke(); g.lineWidth = 3; g.beginPath(); g.roundRect(-236, -72, 472, 144, 12); g.stroke();
-      g.fillStyle = BLUE; g.textAlign = 'center'; g.font = `800 76px ${F}`; g.fillText('BET PLACED', 0, 14); g.font = `700 26px ${F}`; g.fillText('YES · 0.5 SOL · ✓', 0, 56); g.restore();
-    }
-    overTex();
+    if (T < T_BET - .3) { overTex(); return; }
+    const cmd = 'opm bet --side yes --sol 0.5', t = T - T_BET, nn = t > 0 ? Math.floor(clamp(t / .62) * cmd.length) : 0, placed = T >= T_STAMP, a = easeOut(clamp((T - T_BET + .3) / .3));
+    g.font = `400 34px ${F}`; const typed = cmd.slice(0, nn), full = g.measureText('% ' + cmd + '  ✓').width, w = full + 80, x = (W - w) / 2, y = 628 + (1 - a) * 24;
+    g.globalAlpha = a; g.fillStyle = 'rgba(255,255,255,.97)'; g.shadowColor = 'rgba(29,34,51,.14)'; g.shadowBlur = 24; g.shadowOffsetY = 6; g.beginPath(); g.roundRect(x, y, w, 76, 38); g.fill(); g.shadowColor = 'transparent';
+    g.fillStyle = MUTE; g.fillText('%', x + 40, y + 50); g.fillStyle = placed ? BLUE : INK; const px = x + 40 + g.measureText('% ').width; g.fillText(typed, px, y + 50);
+    if (!placed && Math.floor(T * 3) % 2 === 0) { g.fillStyle = BLUE; g.fillRect(px + g.measureText(typed).width + 4, y + 20, 16, 38); }
+    if (placed) { const k = clamp((T - T_STAMP) / .2); g.globalAlpha = a * k; g.font = `700 34px ${F}`; g.fillStyle = BLUE; g.fillText('✓', px + g.measureText(cmd + '  ').width - 8 + (1 - k) * 10, y + 50); }
+    g.globalAlpha = 1; overTex();
   }
   function overTex() { ovTex.needsUpdate = true; }
   function drawTerm(T) {                                   // the PC's own screen: the terminal you're about to land in
     const g = sx, W = 1024, H = 768, t = T - T_TERM;
-    const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#f6f8ff'); bg.addColorStop(1, '#e2e9fb'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
-    g.fillStyle = '#e6ecfb'; g.fillRect(0, 0, W, 70); g.fillStyle = '#c9d3ef'; g.fillRect(0, 70, W, 3);
-    [RED, '#e6b84b', '#57b36b'].forEach((c, i) => { g.fillStyle = c; g.beginPath(); g.arc(44 + i * 34, 35, 10, 0, 7); g.fill(); });
-    g.font = `400 24px ${F}`; g.fillStyle = MUTE; g.textAlign = 'center'; g.fillText('anon@opm-lab — zsh', W / 2, 44); g.textAlign = 'left';
-    const s = stories(); g.font = `400 22px ${F}`;
-    s.slice(0, 5).forEach((x, i) => { if (t < .1 + i * .12) return; g.fillStyle = BLUE; g.fillText(String(i + 1).padStart(2, '0'), 58, 120 + i * 34); g.fillStyle = x.yes != null && x.yes < .5 ? RED : BLUE; g.fillText(x.yes != null ? (Math.round(x.yes * 100) + '%').padStart(4, ' ') : '  — ', 112, 120 + i * 34);
-      g.fillStyle = INK; const q = x.q.length > 46 ? x.q.slice(0, 45) + '…' : x.q; g.fillText(q, 200, 120 + i * 34); });
-    g.font = `700 196px ${F}`; g.fillStyle = INK; const tw = g.measureText('opm').width, x0 = (W - tw - 60) / 2; g.fillText('opm', x0, 470);
-    if (Math.floor(T * 2.4) % 2 === 0) { g.fillStyle = BLUE; g.fillRect(x0 + tw + 18, 334, 42, 140); }
-    const by = 518, bx = 96, bw = W - 192;
-    g.fillStyle = BLUE; g.beginPath(); g.roundRect(bx, by, bw * .62 - 6, 34, 17); g.fill(); g.fillStyle = RED; g.beginPath(); g.roundRect(bx + bw * .62 + 6, by, bw * .38 - 6, 34, 17); g.fill();
+    g.fillStyle = '#fbfcff'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#eef1fb'; g.fillRect(0, 0, W, 64); g.fillStyle = '#dfe5f6'; g.fillRect(0, 64, W, 2);
+    [RED, '#e6b84b', '#57b36b'].forEach((c, i) => { g.fillStyle = c; g.beginPath(); g.arc(40 + i * 30, 32, 9, 0, 7); g.fill(); });
+    g.font = `400 22px ${F}`; g.fillStyle = MUTE; g.textAlign = 'center'; g.fillText('opm — zsh', W / 2, 40); g.textAlign = 'left';
+    g.font = `700 200px ${F}`; g.fillStyle = INK; const tw = g.measureText('opm').width, x0 = (W - tw - 62) / 2; g.fillText('opm', x0, 420);
+    if (Math.floor(T * 2.4) % 2 === 0) { g.fillStyle = BLUE; g.fillRect(x0 + tw + 20, 282, 42, 142); }
+    const bw = 420, bx = (W - bw) / 2, by = 470;
+    g.fillStyle = BLUE; g.beginPath(); g.roundRect(bx, by, bw * .62 - 5, 18, 9); g.fill(); g.fillStyle = RED; g.beginPath(); g.roundRect(bx + bw * .62 + 5, by, bw * .38 - 5, 18, 9); g.fill();
     const cmd = 'opm --enter', nn = Math.floor(clamp((T - (T_ALIGN - .3)) / .5) * cmd.length);
-    g.font = `400 30px ${F}`; g.fillStyle = MUTE; g.fillText('anon@opm-lab ~ %', 58, H - 66); const px = 58 + g.measureText('anon@opm-lab ~ % ').width;
-    g.fillStyle = INK; g.fillText(cmd.slice(0, nn), px, H - 66); if (Math.floor(T * 3) % 2 === 0) { g.fillStyle = BLUE; g.fillRect(px + g.measureText(cmd.slice(0, nn)).width + 4, H - 92, 14, 32); }
-    if (t < .14) { g.globalAlpha = 1 - t / .14; g.imageSmoothingEnabled = false; g.drawImage(NOISE[(T * 30 | 0) % 3], 0, 0, W, H); g.imageSmoothingEnabled = true; g.globalAlpha = 1; }
-    g.fillStyle = 'rgba(20,30,70,.035)'; for (let y = 0; y < H; y += 4) g.fillRect(0, y, W, 2);
-    const v = g.createRadialGradient(W / 2, H / 2, 320, W / 2, H / 2, 780); v.addColorStop(0, 'rgba(90,110,170,0)'); v.addColorStop(1, 'rgba(90,110,170,.22)'); g.fillStyle = v; g.fillRect(0, 0, W, H);
+    g.font = `400 28px ${F}`; g.fillStyle = MUTE; g.fillText('anon@opm-lab ~ %', 60, H - 64); const px = 60 + g.measureText('anon@opm-lab ~ % ').width;
+    g.fillStyle = INK; g.fillText(cmd.slice(0, nn), px, H - 64); if (Math.floor(T * 3) % 2 === 0) { g.fillStyle = BLUE; g.fillRect(px + g.measureText(cmd.slice(0, nn)).width + 4, H - 88, 13, 30); }
+    const v = g.createRadialGradient(W / 2, H / 2, 360, W / 2, H / 2, 760); v.addColorStop(0, 'rgba(90,110,170,0)'); v.addColorStop(1, 'rgba(90,110,170,.1)'); g.fillStyle = v; g.fillRect(0, 0, W, H);
+    if (t < .22) { g.fillStyle = `rgba(255,255,255,${1 - t / .22})`; g.fillRect(0, 0, W, H); }    // a clean fade, no static
     scrTex.needsUpdate = true;
   }
   // the screen's world: turns to each big story in turn, pins pop, odds rise off them
@@ -234,9 +219,7 @@ export async function playIntro(el, getLive) {
     globe.rotation.set(gpitch, gyaw, 0);
     const z = 4.45 - .4 * easeOut(clamp(T / T_TERM)); gcam.position.set(0, -.05, z); gcam.lookAt(0, -.02, 0);
     tour.forEach((it, i) => { const on = it === cur, lt = (T - .7) - i * seg, k = on ? easeOut(clamp(lt / .3)) : lt >= seg ? Math.max(0, 1 - clamp((lt - seg) / .2)) : 0;
-      it.head.getWorldPosition(wp); const sc = .105 * k; it.label.scale.set(sc * it.label.userData.aspect, sc, 1); it.label.position.copy(wp).add(V(.05, .05, .1)); });
-    risers.forEach(r => { const k = ((T * .5 + r.ph) % 1), it = r.it; if (!it || it.g.scale.x < .5) { r.s.scale.set(.0001, .0001, 1); return; } it.head.getWorldPosition(wp);
-      r.s.position.copy(wp).add(V(0, k * .5, .05)); const sc = .07 * Math.sin(k * Math.PI); r.s.scale.set(sc * r.s.userData.aspect, sc, 1); r.s.material.opacity = Math.sin(k * Math.PI); });
+      it.head.getWorldPosition(wp); const sc = .075 * k; it.label.scale.set(sc * it.label.userData.aspect, sc, 1); it.label.position.copy(wp).add(V(.045, .03, .1)); });
     renderer.setRenderTarget(rt); renderer.render(gs, gcam); renderer.setRenderTarget(null);
   }
 
@@ -265,7 +248,7 @@ export async function playIntro(el, getLive) {
   const look = V(0, 0, 0), wp = V(0, 0, 0);
   const composer = new EffectComposer(renderer), rp = new RenderPass(scene, cam); composer.addPass(rp);
   const bokeh = new BokehPass(scene, cam, { focus: 10, aperture: .002, maxblur: .006 }); bokeh.enabled = !small; composer.addPass(bokeh);
-  composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), .22, .45, .92));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), .22, .45, .97));
   const rgb = new ShaderPass(RGBShiftShader); rgb.uniforms.amount.value = 0; composer.addPass(rgb);
   const vig = new ShaderPass(VignetteShader); vig.uniforms.offset.value = .6; vig.uniforms.darkness.value = 1; composer.addPass(vig);
   composer.addPass(new OutputPass());
@@ -299,14 +282,13 @@ export async function playIntro(el, getLive) {
       ringMat.opacity = .35 + .25 * Math.sin(T * 3);
       for (let i = 0; i < DUST; i++) { const s = dseed[i]; dpos[i * 3] = base[i * 3] + Math.sin(T * .3 + s) * .08; dpos[i * 3 + 1] = base[i * 3 + 1] + Math.sin(T * .22 + s * 1.7) * .06 + T * .02; dpos[i * 3 + 2] = base[i * 3 + 2] + Math.cos(T * .25 + s) * .08; }
       dgeo.attributes.position.needsUpdate = true; glass.material.opacity = .05;
-      glow.intensity = .4 + (T >= T_STAMP && T < T_STAMP + .3 ? .6 * (1 - (T - T_STAMP) / .3) : 0);
+      glow.intensity = .4 + (T >= T_STAMP && T < T_STAMP + .3 ? .3 * (1 - (T - T_STAMP) / .3) : 0);
       const down = T > T_STAMP - .14 && T < T_STAMP + .08; yesKey.position.y = down ? .012 : .022; yesMat.emissiveIntensity = T > T_STAMP - .14 && T < T_STAMP + .9 ? .9 * (1 - clamp((T - T_STAMP) / .9)) : 0;
       ledA.visible = !(T > T_STAMP && T < T_STAMP + 1.2 && Math.floor(T * 10) % 2);
       // camera: down from the sky to the PC, a slow push in while the bet goes through, round to the front, the dive
       let fov = fov0;
       if (T < T_NEAR) { const k = ease(clamp(T / T_NEAR)); down1.getPointAt(k, cam.position); downL.getPointAt(k, look); }
-      else if (T < T_TERM) { const k = ease(clamp((T - T_NEAR) / (T_TERM - T_NEAR))); cam.position.lerpVectors(nearP, betP, k); look.lerpVectors(V(0, .52, .06), SCR, k);
-        if (T > T_STAMP) { const a = .012 * (1 - clamp((T - T_STAMP) / .33)); cam.position.x += Math.sin(T * 95) * a; cam.position.y += Math.cos(T * 77) * a; } }
+      else if (T < T_TERM) { const k = ease(clamp((T - T_NEAR) / (T_TERM - T_NEAR))); cam.position.lerpVectors(nearP, betP, k); look.lerpVectors(V(0, .52, .06), SCR, k); }
       else if (T < T_ALIGN) { const k = ease(clamp((T - T_TERM) / (T_ALIGN - T_TERM))); cam.position.lerpVectors(betP, alignP, k); look.copy(SCR); }
       else { const k = clamp((T - T_ALIGN) / (T_DIVE - T_ALIGN)), e = k * k * k; cam.position.lerpVectors(alignP, V(0, .595, .13), e); look.copy(SCR); fov = fov0 + 26 * e; }
       cam.lookAt(look); if (cam.fov !== fov) { cam.fov = fov; cam.updateProjectionMatrix(); }
