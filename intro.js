@@ -118,7 +118,7 @@ export async function playIntro(el, getLive) {
   const FALL = [{ q: 'The world is placing its bets', yes: null, cat: 'LIVE', geo: null }];
   let ST = null;
   const stories = () => {
-    if (!ST) { const s = (getLive && getLive() || []).filter(e => e && e.title && e.lead && e.lead.yes != null).slice(0, 8).map(e => ({ q: e.title, yes: e.lead.yes, cat: (e.cats && e.cats[0]) || 'world', geo: geoOf(e.title + ' ' + e.lead.q) })); if (s.length) ST = s; }
+    if (!ST) { const s = (getLive && getLive() || []).filter(e => e && e.title && e.lead && e.lead.yes != null).slice(0, 8).map(e => ({ q: e.ms && e.ms.length > 1 && e.lead.label ? e.title.replace(/\?$/, '') + ' · ' + e.lead.label : e.title, yes: e.lead.yes, cat: (e.cats && e.cats[0]) || 'world', geo: geoOf(e.title + ' ' + e.lead.q) })); if (s.length) ST = s; }
     return ST || FALL;
   };
   const MAP = []; LAND.forEach((row, j) => { if (j % 2) return; for (let i = 0; i < row.length; i += 2) if (row[i] === 'X') MAP.push([i, j]); });   // every other cell, for a TV-sized dotted map

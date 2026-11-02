@@ -40,7 +40,7 @@ function shapeMarket(m) {
 function shapeEvent(e) {
   const ms = (e.markets || []).filter(m => !m.closed && m.active !== false && m.archived !== true).map(shapeMarket).filter(m => m.yes != null);
   if (!ms.length) return null;
-  const lead = [...ms].sort((a, b) => b.v24 - a.v24 || b.vol - a.vol)[0];
+  const lead = ms.length > 1 ? [...ms].sort((a, b) => b.yes - a.yes || b.v24 - a.v24)[0] : ms[0];   // a multi-outcome question leads with its favourite
   const text = ((e.tags || []).map(t => t.slug || t.label || '').join(' ') + ' ' + e.title + ' ' + lead.q).toLowerCase();
   const cats = CATS.filter(c => c[1].test(text)).map(c => c[0]);
   return { id: String(e.id), slug: e.slug, title: e.title, img: e.image || e.icon || '', v24: +e.volume24hr || ms.reduce((s, m) => s + m.v24, 0), vol: +e.volume || 0, end: e.endDate, ms, lead, cats: cats.length ? cats : ['world'] };
@@ -240,8 +240,8 @@ function stats() {
   const CC = { politics: '#3f6dff', crypto: '#7d99ff', sports: '#b9c8ff', world: '#e8483b', tech: '#1d2233', culture: '#f0a39b', economy: '#6b7391' }, by = {};
   EV.forEach(e => by[e.cats[0]] = (by[e.cats[0]] || 0) + e.v24);
   $('#s-cb').innerHTML = Object.entries(by).sort((a, c) => c[1] - a[1]).map(([c, v]) => `<i style="flex-grow:${v.toFixed(0)};background:${CC[c] || '#cbc3b0'}" title="${c} · ${usd(v)}"></i>`).join('');
-  $('#tlive').innerHTML = `<b>●</b> ${EV.length} live${solUsd ? ' · SOL $' + solUsd.toFixed(2) : ''}`;
-  let mv = null; for (const e of EV) if (e.lead.v24 > 2000 && (!mv || Math.abs(e.lead.d1) > Math.abs(mv.lead.d1))) mv = e;
+  $('#tlive').innerHTML = `<b>●</b> ${EV.reduce((s, e) => s + e.ms.length, 0).toLocaleString()} live${solUsd ? ' · SOL $' + solUsd.toFixed(2) : ''}`;
+  let mv = null; for (const e of EV) if (e.lead.v24 > 2000 && e.lead.yes > .03 && e.lead.yes < .97 && (!mv || Math.abs(e.lead.d1) > Math.abs(mv.lead.d1))) mv = e;
   $('#s-m').innerHTML = mv && mv.lead.d1 ? `<span class="${mv.lead.d1 > 0 ? 'up' : 'dn'}">${mv.lead.d1 > 0 ? '▲' : '▼'} ${Math.abs(mv.lead.d1 * 100).toFixed(1)} pts</span><small title="${esc(qOf(mv))}">${esc(qOf(mv))}</small>` : 'quiet';
 }
 
@@ -251,7 +251,7 @@ function tipHtml(e) { const g = geoOf(e.title + ' ' + e.lead.q); return `<small>
 const wio = new IntersectionObserver(async es => {
   if (!es[0].isIntersecting || G) return; wio.disconnect();
   try {
-    const { mountGlobe } = await import('./world.js?v=2');
+    const { mountGlobe } = await import('./world.js?v=3');
     G = mountGlobe($('#globe'), {
       onPick: e => { setBet(e, 'yes'); $('#bet').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); },
       label: e => { $$('#brows .brow').forEach(r => r.classList.toggle('hl', r.dataset.id === e.id)); },
@@ -566,12 +566,12 @@ async function refresh() {
 async function sol() {
   try { const r = await get('https://lite-api.jup.ag/price/v3?ids=So11111111111111111111111111111111111111112'); solUsd = +(r.So11111111111111111111111111111111111111112?.usdPrice) || solUsd; }
   catch { try { const r = await get('https://api.coinbase.com/v2/prices/SOL-USD/spot'); solUsd = +r.data?.amount || solUsd; } catch {} }
-  if (bet.e) quote(); if (EV.length) $('#tlive').innerHTML = `<b>●</b> ${EV.length} live${solUsd ? ' · SOL $' + solUsd.toFixed(2) : ''}`;
+  if (bet.e) quote(); if (EV.length) $('#tlive').innerHTML = `<b>●</b> ${EV.reduce((s, e) => s + e.ms.length, 0).toLocaleString()} live${solUsd ? ' · SOL $' + solUsd.toFixed(2) : ''}`;
 }
 async function intro() {
   const el = $('#intro'), H = document.documentElement; if (!el) return;
   if (!H.classList.contains('intro-on')) { el.remove(); return; }
-  try { const mod = await Promise.race([import('./intro.js?v=2'), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 8000))]); await mod.playIntro(el, () => EV); }
+  try { const mod = await Promise.race([import('./intro.js?v=3'), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 8000))]); await mod.playIntro(el, () => EV); }
   catch { el.classList.add('out'); }
   $('#termbox').classList.add('land'); setTimeout(() => { H.classList.remove('intro-on'); el.remove(); }, 850);
 }
