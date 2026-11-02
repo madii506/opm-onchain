@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>opm</title>
+<meta name="description" content="onchain predictions. bet with SOL on world events and launch a coin on any of them.">
+<meta property="og:title" content="opm · onchain predictions"><meta property="og:description" content="bet with SOL on world events and launch a coin on any of them."><meta property="og:type" content="website"><meta property="og:url" content="https://opm-onchain.vercel.app/"><meta property="og:image" content="https://opm-onchain.vercel.app/og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="opm · onchain predictions"><meta name="twitter:description" content="bet with SOL on world events and launch a coin on any of them."><meta name="twitter:image" content="https://opm-onchain.vercel.app/og.jpg">
+<meta name="theme-color" content="#f2efe7">
+<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>try{var q=location.search;if(/[?&]intro\b/.test(q)||(!sessionStorage.getItem('opm:intro')&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!/^#\//.test(location.hash)&&!/[?&]nointro\b/.test(q)))document.documentElement.classList.add('intro-on')}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
+<style>
+:root{--paper:#f2efe7;--paper2:#ebe6da;--card:#fbfaf6;--ln:#ddd6c6;--ln2:#cbc3b0;--ink:#1d2233;--ink2:#3a4057;--mute:#6b7391;--blue:#3f6dff;--blue2:#2f57e0;--red:#e8483b;--peri:#a9b8e2;--cream:#e4cfa6;--f:"JetBrains Mono",ui-monospace,monospace}
+*{box-sizing:border-box}html{background:var(--paper);scroll-behavior:smooth}body{margin:0;color:var(--ink);font:14px/1.6 var(--f);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(rgba(29,34,51,.08) 1px,transparent 1.3px) 0 0/24px 24px}
+a{color:inherit}button,input,select{font:inherit;color:inherit}[hidden]{display:none!important}
+.wrap{position:relative;z-index:1;max-width:1220px;margin:0 auto;padding:0 24px}
+/* intro */
+#intro{display:none}
+html.intro-on{overflow:hidden}
+html.intro-on #intro{display:block;position:fixed;inset:0;z-index:200;background:#a9b8e2;cursor:pointer;transition:opacity .8s ease .05s}
+#intro canvas{width:100%;height:100%;display:block;opacity:0;transition:opacity .9s}#intro.on canvas{opacity:1}
+#intro .flash{position:absolute;inset:0;background:radial-gradient(circle,#fff,#f4f7ff 40%,#dfe7fb);opacity:0;pointer-events:none}
+#intro.out{opacity:0;pointer-events:none}
+#intro .skip{position:absolute;right:20px;bottom:18px;z-index:2;font:500 12px var(--f);letter-spacing:.04em;color:rgba(29,34,51,.62);background:rgba(251,250,246,.55);border:1px solid rgba(29,34,51,.14);border-radius:999px;padding:7px 13px;cursor:pointer;backdrop-filter:blur(6px);opacity:0;transition:opacity .6s .8s}#intro.on .skip{opacity:1}#intro .skip:hover{color:var(--ink);background:rgba(251,250,246,.9)}
+/* top */
+.prog{position:fixed;left:0;top:0;width:100%;height:3px;z-index:60;background:linear-gradient(90deg,var(--blue),#7aa0ff 60%,var(--red));transform-origin:0 50%;transform:scaleX(0)}
+.top{position:sticky;top:0;z-index:50;background:rgba(242,239,231,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--ln)}
+.top .wrap{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:64px;gap:16px}
+.logo{display:flex;align-items:center;gap:6px;text-decoration:none;font:800 24px var(--f);letter-spacing:-.02em}.logo i{display:inline-block;width:10px;height:22px;background:var(--blue);animation:bl 1.1s steps(1) infinite}
+.nav{display:flex;gap:4px;justify-self:center;padding:4px;border:1px solid var(--ln);border-radius:999px;background:var(--card)}
+.nav a{font:500 12px var(--f);text-decoration:none;color:var(--mute);padding:8px 14px;border-radius:999px;transition:.2s}.nav a:hover,.nav a.on{background:var(--ink);color:var(--paper)}
+.right{justify-self:end;display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 12px var(--f);letter-spacing:.02em;padding:11px 16px;border-radius:10px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);text-decoration:none;cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s}
+.btn:hover{box-shadow:0 6px 0 rgba(29,34,51,.15);transform:translateY(-2px)}.btn.blue{background:var(--blue);border-color:var(--blue);color:#fff}.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink)}.btn.sm{padding:7px 11px;font-size:11px}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.tick{position:relative;z-index:1;border-bottom:1px solid var(--ln);background:var(--card);overflow:hidden;white-space:nowrap}
+.tick .run{display:inline-flex;gap:28px;padding:9px 0;animation:run 80s linear infinite}.tick:hover .run{animation-play-state:paused}
+.tick span{font-size:12px;color:var(--ink2)}.tick b{color:var(--blue);font-weight:700}.tick em{font-style:normal;color:var(--red)}
+@keyframes run{to{transform:translateX(-50%)}}@keyframes bl{50%{opacity:0}}
+/* hero */
+.hero{position:relative;z-index:1;padding:56px 0 30px}
+.hero .hg{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:34px;align-items:center}
+.prompt{font-size:13px;color:var(--mute)}.prompt i{display:inline-block;width:8px;height:15px;background:var(--blue);vertical-align:-2px;margin-left:6px;animation:bl 1.1s steps(1) infinite}
+.hero h1{font:800 clamp(44px,6.4vw,84px)/.98 var(--f);letter-spacing:-.045em;margin:16px 0 18px}.hero h1 em{font-style:normal;color:var(--blue)}
+.hero p.sub{color:var(--ink2);max-width:470px;margin:0 0 22px;font-size:15px}
+.checks{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:8px}.checks li{display:flex;gap:10px;font-size:13.5px}.checks li:before{content:"✓";color:var(--blue);font-weight:800}
+.ctas{display:flex;gap:10px;flex-wrap:wrap}
+.term{background:var(--card);border:1px solid var(--ln2);border-radius:14px;box-shadow:0 30px 60px -30px rgba(29,34,51,.35),0 2px 0 rgba(255,255,255,.6) inset;overflow:hidden}
+.tbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--ln);background:var(--paper2);font-size:12px;color:var(--mute)}
+.tbar i{width:11px;height:11px;border-radius:50%;background:#e2d9c6;border:1px solid var(--ln2)}.tbar i:nth-child(1){background:var(--red);border-color:#c63a2e}.tbar i:nth-child(2){background:#e6b84b;border-color:#c99c34}.tbar i:nth-child(3){background:#57b36b;border-color:#3d9653}
+.tbar span{margin:0 auto;transform:translateX(-24px)}.tbar em{font-style:normal;font-size:11px;color:var(--mute);white-space:nowrap}.tbar em b{color:#57b36b;font-weight:700}
+.term{position:relative}.term:after{content:"";position:absolute;inset:41px 0 0;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(29,34,51,.018) 0 2px,transparent 2px 4px),radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.5),transparent 60%);mix-blend-mode:multiply}
+.cbar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:8px;background:var(--ln)}.cbar i{display:block;height:100%;transition:flex-grow 1s cubic-bezier(.2,.7,.2,1)}
+#out{height:420px;overflow:auto;padding:16px 18px 6px;font-size:13px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+#out .wl{white-space:pre;overflow:hidden;text-overflow:ellipsis}#out .c{color:var(--mute)}#out .b{color:var(--blue)}#out .r{color:var(--red)}#out .k{font-weight:700}#out a{color:var(--blue);cursor:pointer;text-decoration:underline}
+.inrow{display:flex;align-items:center;gap:8px;padding:10px 18px 14px;border-top:1px dashed var(--ln)}.inrow label{color:var(--mute);white-space:nowrap;font-size:13px}
+#cmd{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:13px;caret-color:var(--blue)}
+.chipsQ{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px 14px}.chipsQ button{border:1px solid var(--ln);background:var(--paper);border-radius:999px;padding:4px 10px;font-size:11px;color:var(--ink2);cursor:pointer}.chipsQ button:hover{border-color:var(--blue);color:var(--blue)}
+.stats{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--ln);border-radius:14px;background:var(--card);margin-top:34px;overflow:hidden}
+.stats div{padding:16px 18px;border-right:1px solid var(--ln);min-width:0}.stats b small{display:block;font:500 11.5px/1.4 var(--f);color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px;letter-spacing:0}.stats div:last-child{border:0}.stats i{display:block;font-style:normal;font-size:11px;color:var(--mute);letter-spacing:.04em}.stats b{font:800 26px var(--f);letter-spacing:-.02em}
+/* sections */
+section.blk{position:relative;z-index:1;padding:84px 0}section.blk[data-n]:before{content:attr(data-n);position:absolute;right:max(2vw,calc(50% - 680px));top:30px;font:800 clamp(140px,19vw,300px)/1 var(--f);letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1.5px rgba(29,34,51,.07);transform:translate3d(0,var(--py,0px),0);pointer-events:none;z-index:-1}
+.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:26px}
+.hd .n{font-size:12px;color:var(--mute);letter-spacing:.06em}.hd .n b{color:var(--blue)}
+.hd h2{font:800 clamp(26px,3.4vw,40px)/1.1 var(--f);letter-spacing:-.03em;margin:8px 0 0}.hd h2 .ty{border-right:2px solid var(--blue);padding-right:4px}
+.hd p{margin:0;max-width:430px;color:var(--ink2)}
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s,transform .7s cubic-bezier(.2,.7,.2,1)}.rv.in{opacity:1;transform:none}
+.st{opacity:0;transform:translateY(24px) scale(.98);transition:opacity .6s ease var(--d,0s),transform .7s cubic-bezier(.2,.7,.2,1) var(--d,0s)}.st.in{opacity:1;transform:none}
+/* wire */
+.wbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.chip{border:1px solid var(--ln);background:var(--card);border-radius:999px;padding:7px 12px;font-size:11.5px;cursor:pointer;color:var(--ink2);transition:.15s}.chip:hover{border-color:var(--ink)}.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}.chip i{font-style:normal;opacity:.55;margin-left:5px}
+.search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;border:1px solid var(--ln);background:var(--card);border-radius:10px;padding:8px 12px}.search span{color:var(--blue);font-weight:700}.search input{flex:1;border:0;outline:0;background:transparent;font-size:13px}
+select{border:1px solid var(--ln);background:var(--card);border-radius:10px;padding:9px 10px;font-size:12px}
+.lead{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:0;border:1px solid var(--ln2);border-radius:16px;background:var(--card);overflow:hidden;margin-bottom:16px}
+.lead .l{padding:24px}.lead .r{padding:24px;border-left:1px solid var(--ln);display:flex;flex-direction:column;gap:12px}
+.cat{display:inline-flex;gap:6px;font-size:11px;color:var(--red);font-weight:700;letter-spacing:.04em}
+.lead h3{font:800 26px/1.2 var(--f);letter-spacing:-.02em;margin:10px 0 14px}
+.big{font:800 64px/1 var(--f);letter-spacing:-.04em;color:var(--blue)}.big small{font-size:20px;color:var(--mute);margin-left:8px;letter-spacing:0;font-weight:500}
+.yn{position:relative;height:12px;border-radius:6px;background:var(--red);overflow:hidden}.yn i{position:absolute;inset:0 auto 0 0;width:0;background:var(--blue);border-radius:6px 0 0 6px;transition:width 1.2s cubic-bezier(.2,.7,.2,1)}
+.ynl{display:flex;justify-content:space-between;font-size:12px;margin-top:6px}.ynl b:first-child{color:var(--blue)}.ynl b:last-child{color:var(--red)}
+.chart{width:100%;height:120px}.chart .ln{fill:none;stroke:var(--blue);stroke-width:2;vector-effect:non-scaling-stroke}.chart .ar{fill:rgba(63,109,255,.1)}
+.meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mute)}.meta b{color:var(--ink)}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+#cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.card{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid var(--ln);border-radius:14px;background:var(--card);transition:transform .25s,box-shadow .25s,border-color .2s;min-width:0}
+.card:hover{transform:translateY(-4px);box-shadow:0 18px 40px -24px rgba(29,34,51,.45);border-color:var(--ln2)}
+.card h4{margin:0;font:700 14.5px/1.35 var(--f);min-height:2.7em}
+.card .row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.card .p{font:800 34px var(--f);letter-spacing:-.03em;color:var(--blue)}.card .p small{font-size:13px;color:var(--mute);font-weight:500;margin-left:4px}
+.up{color:var(--blue)}.dn{color:var(--red)}.chg{font-size:12px;font-weight:700}
+.card .spark{width:100%;height:34px}.spark .l{fill:none;stroke-width:1.8;vector-effect:non-scaling-stroke}.spark .l.u{stroke:var(--blue)}.spark .l.d{stroke:var(--red)}
+.card .foot{display:flex;gap:6px;margin-top:auto;padding-top:8px;border-top:1px dashed var(--ln)}
+.mini{flex:1;font:700 11px var(--f);padding:8px 6px;border-radius:8px;border:1px solid;cursor:pointer;background:transparent;transition:.15s}.mini.y{color:var(--blue);border-color:rgba(63,109,255,.4)}.mini.y:hover{background:var(--blue);color:#fff}.mini.n{color:var(--red);border-color:rgba(232,72,59,.4)}.mini.n:hover{background:var(--red);color:#fff}.mini.l{color:var(--ink);border-color:var(--ln2)}.mini.l:hover{background:var(--ink);color:var(--paper)}
+.empty{grid-column:1/-1;padding:40px;text-align:center;color:var(--mute)}
+/* bet + launch panels */
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+.panel{border:1px solid var(--ln2);border-radius:16px;background:var(--card);overflow:hidden}
+.panel .body{padding:20px;display:grid;gap:16px}
+.lbl{font-size:11px;color:var(--mute);letter-spacing:.05em;margin-bottom:6px;display:block}
+.pick{display:flex;gap:8px;align-items:center;border:1px solid var(--ln);border-radius:10px;padding:10px 12px;background:var(--paper)}.pick b{flex:1;font-size:13px;line-height:1.35}
+.side{display:grid;grid-template-columns:1fr 1fr;gap:8px}.side button{padding:14px;border-radius:12px;border:2px solid var(--ln);background:var(--paper);font:800 15px var(--f);cursor:pointer;transition:.15s}
+.side button.y.on{border-color:var(--blue);background:rgba(63,109,255,.08);color:var(--blue)}.side button.n.on{border-color:var(--red);background:rgba(232,72,59,.08);color:var(--red)}.side small{display:block;font-weight:500;font-size:11px;color:var(--mute)}
+.amt{display:flex;align-items:center;gap:10px}.amt input[type=range]{flex:1;accent-color:var(--blue)}.amt input[type=number]{width:96px;border:1px solid var(--ln);border-radius:8px;padding:8px;background:var(--paper)}
+.quick{display:flex;gap:6px}.quick button{flex:1;border:1px solid var(--ln);background:var(--paper);border-radius:8px;padding:6px;font-size:11px;cursor:pointer}.quick button:hover{border-color:var(--blue)}
+.sum{display:grid;gap:6px;padding:14px;border-radius:12px;background:var(--paper);border:1px dashed var(--ln2);font-size:12.5px}.sum div{display:flex;justify-content:space-between}.sum b{font-weight:700}.sum .win b{color:var(--blue);font-size:15px}.sum .warn{color:var(--red);font-size:11.5px}.sum .solp{color:var(--mute);font-size:11px;margin-top:-4px}.sum .solp i{width:7px;height:7px;border-radius:50%;background:#57b36b;align-self:center;box-shadow:0 0 0 3px rgba(87,179,107,.2)}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:12.5px}.steps li{display:flex;gap:10px;color:var(--mute)}.steps li:before{content:"○";color:var(--ln2)}.steps li.ok{color:var(--ink)}.steps li.ok:before{content:"✓";color:var(--blue);font-weight:800}.steps li.run:before{content:"◌";color:var(--blue);animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.note{font-size:11.5px;color:var(--mute);margin:0}
+.slipbox{display:flex;justify-content:center;padding:18px;background:linear-gradient(180deg,var(--paper2),var(--paper))}
+.slipp{width:240px;background:#fbf8f1;box-shadow:0 14px 30px -18px rgba(0,0,0,.4);padding:16px 16px 26px;font-size:11.5px;position:relative;clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),95% 100%,90% calc(100% - 8px),85% 100%,80% calc(100% - 8px),75% 100%,70% calc(100% - 8px),65% 100%,60% calc(100% - 8px),55% 100%,50% calc(100% - 8px),45% 100%,40% calc(100% - 8px),35% 100%,30% calc(100% - 8px),25% 100%,20% calc(100% - 8px),15% 100%,10% calc(100% - 8px),5% 100%,0 calc(100% - 8px));transform-origin:top;animation:print 1.2s steps(14) both}
+.slipp h5{margin:0;text-align:center;font:800 18px var(--f)}.slipp .c{text-align:center;color:var(--mute);margin-bottom:8px}.slipp hr{border:0;border-top:2px dashed var(--ln2);margin:8px 0}.slipp div{display:flex;justify-content:space-between;gap:8px}.slipp .q{display:block;font-weight:700;margin:4px 0 6px}
+@keyframes print{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+.field{display:grid;gap:6px}.field input,.field textarea{border:1px solid var(--ln);border-radius:10px;padding:10px 12px;background:var(--paper);outline:0;font-size:13px}.field input:focus,.field textarea:focus{border-color:var(--blue)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.styles{display:flex;gap:6px}.styles button{flex:1;border:1px solid var(--ln);border-radius:8px;background:var(--paper);padding:7px;font-size:11px;cursor:pointer}.styles button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+#coinimg{width:100%;aspect-ratio:1;border-radius:12px;border:1px solid var(--ln);background:var(--paper);display:block}
+/* how */
+.status{display:flex;gap:12px;align-items:center;margin-top:18px;padding:14px 16px;border:1px dashed var(--ln2);border-radius:12px;font-size:12.5px;color:var(--ink2)}.status b{display:inline-flex;align-items:center;gap:6px}.status b:before{content:"";width:8px;height:8px;border-radius:50%;background:#e6b84b;box-shadow:0 0 0 4px rgba(230,184,75,.2)}
+/* scroll set pieces */
+.split{position:relative;z-index:1;overflow:hidden;padding:22px 0 26px;border-block:1px solid var(--ln);background:var(--card)}
+.split div{white-space:nowrap;font:800 clamp(54px,9vw,128px)/1.02 var(--f);letter-spacing:-.05em;will-change:transform}
+.sy{color:var(--blue)}.sn{color:transparent;-webkit-text-stroke:2px var(--red)}.split em{font-style:normal;opacity:.3;font-weight:500}
+.tick .sk{will-change:transform;transition:transform .35s ease-out}.tick .lv{position:absolute;left:0;top:0;bottom:0;z-index:2;display:flex;align-items:center;gap:7px;padding:0 14px 0 16px;background:var(--red);color:#fff;font:700 11px var(--f);letter-spacing:.08em;box-shadow:8px 0 14px -6px rgba(29,34,51,.25)}.tick .lv:before{content:"";width:7px;height:7px;border-radius:50%;background:#fff;animation:bl 1.1s steps(1) infinite}.tick .run{padding-left:96px}
+.hd{position:relative}.hd:after{content:"";position:absolute;left:0;right:0;bottom:-13px;height:1px;background:var(--ln2);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.2s cubic-bezier(.2,.7,.2,1) .25s}.hd.in:after{transform:none}
+.chart .ln,.spark .l{stroke-dasharray:3000;stroke-dashoffset:3000}.spark .l,.lead.in .chart .ln{animation:draw 1.8s cubic-bezier(.3,.6,.2,1) .1s forwards}@keyframes draw{to{stroke-dashoffset:0}}
+.chart .ar{opacity:0}.lead.in .chart .ar{animation:fadein 1s .9s forwards}@keyframes fadein{to{opacity:1}}
+.pin{padding:0}.pin-in{padding:70px 0}
+.rail{position:relative;height:30px;margin:6px 0 18px;display:grid;grid-template-columns:repeat(4,1fr);font-size:11px;color:var(--mute);letter-spacing:.04em}
+.rail:before,.rail i{content:"";position:absolute;left:0;right:0;top:0;height:3px;border-radius:2px;background:var(--ln)}.rail i{background:linear-gradient(90deg,var(--blue),var(--red));transform:scaleX(0);transform-origin:0 50%}
+.rail b{position:absolute;top:-6px;left:0;width:15px;height:15px;margin-left:-7px;border-radius:50%;background:var(--card);border:3px solid var(--blue);box-shadow:0 0 0 5px rgba(63,109,255,.15)}
+.rail span{padding-top:12px}
+.htrack{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;will-change:transform}
+.htrack .s{border:1px solid var(--ln);border-radius:14px;background:var(--card);padding:18px;position:relative;transition:opacity .5s,transform .6s cubic-bezier(.2,.7,.2,1),border-color .4s,box-shadow .4s}
+.htrack .s.on{border-color:var(--ln2);box-shadow:0 22px 44px -30px rgba(29,34,51,.45)}
+.htrack .s .no{font:800 30px var(--f);color:var(--blue);letter-spacing:-.03em}.htrack .s h4{margin:10px 0 6px;font-size:15px}.htrack .s p{margin:0;font-size:12.5px;color:var(--ink2)}.htrack .s code{display:block;margin-top:10px;font-size:11px;color:var(--mute);background:var(--paper);border-radius:6px;padding:6px 8px}
+.ill{position:relative;height:124px;margin-top:12px;border-radius:10px;background:var(--paper);border:1px solid var(--ln);overflow:hidden}
+.ill em{position:absolute;right:12px;bottom:8px;font:700 10.5px var(--f);font-style:normal;color:var(--mute)}
+.mslip{position:absolute;left:50%;top:14px;width:84px;height:120px;margin-left:-42px;background:#fbf8f1;box-shadow:0 10px 18px -10px rgba(0,0,0,.45);text-align:center;padding-top:8px;font-size:9px;transform:rotate(-5deg) translateY(110%);transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.mslip b{display:block;font:800 13px var(--f)}.mslip small{color:var(--mute)}.mslip i{display:block;margin:6px 8px;border-top:1px dashed var(--ln2)}
+.mslip em{position:static;display:block;font:800 26px var(--f);color:var(--blue);transform:scale(2.2);opacity:0;transition:transform .35s cubic-bezier(.3,1.6,.5,1) .7s,opacity .2s .7s}
+.s.on .mslip{transform:rotate(-5deg)}.s.on .mslip em{transform:none;opacity:1}
+.lane{position:absolute;left:0;right:96px;top:50%;height:22px;margin-top:-11px;border-block:1px dashed var(--ln2)}
+.lane span{position:absolute;top:2px;left:-50px;font-size:10px;font-weight:700;padding:1px 8px;border-radius:99px;border:1px solid;background:var(--card);animation:lane 3.6s linear infinite;animation-play-state:paused}
+.lane .b{color:var(--blue)}.lane .r{color:var(--red)}
+.lane span:nth-child(2){animation-delay:-.6s}.lane span:nth-child(3){animation-delay:-1.2s}.lane span:nth-child(4){animation-delay:-1.8s}.lane span:nth-child(5){animation-delay:-2.4s}.lane span:nth-child(6){animation-delay:-3s}
+@keyframes lane{to{left:calc(100% + 4px)}}.s.on .lane span{animation-play-state:running}
+.book{position:absolute;right:16px;top:50%;width:66px;height:62px;margin-top:-31px;border:2px solid var(--ink);border-radius:10px;display:grid;place-items:center;font-size:11px;font-weight:700;background:var(--card)}
+.s.on .i2 .book{animation:gulp 3.6s ease-in-out infinite}@keyframes gulp{0%,100%{transform:none}50%{transform:scale(1.06)}}
+.i3 .book{left:16px;right:auto}.arr{position:absolute;left:96px;right:110px;top:50%;height:2px;background:var(--ln2)}.arr i{position:absolute;top:-4px;left:0;width:10px;height:10px;border-radius:50%;background:var(--blue);opacity:0}
+.s.on .arr i{animation:hop 1.6s ease-in-out infinite}@keyframes hop{0%{left:0;opacity:0}15%{opacity:1}85%{opacity:1}100%{left:calc(100% - 10px);opacity:0}}
+.stack{position:absolute;right:18px;top:24px;display:grid;gap:5px}.stack i{display:block;width:72px;height:9px;border-radius:3px;background:var(--blue);transform:scaleX(0);transform-origin:0 50%;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.s.on .stack i{transform:none}.stack i:nth-child(2){transition-delay:.15s}.stack i:nth-child(3){transition-delay:.3s}.stack i:nth-child(4){transition-delay:.45s}.stack i:nth-child(5){transition-delay:.6s}
+.dots{position:absolute;inset:14px 14px 26px;display:grid;grid-template-columns:repeat(12,14px);gap:9px 12px;justify-content:center;align-content:center}.dots i{width:14px;height:14px;border-radius:50%;background:var(--ln2);transition:background .3s,transform .3s}#how .hd:after{display:none}
+.s.on .dots i{background:var(--blue);animation:pop .5s cubic-bezier(.3,1.6,.5,1) both;animation-delay:var(--d)}@keyframes pop{0%{transform:scale(.4)}60%{transform:scale(1.5)}100%{transform:none}}
+.fab{position:fixed;right:22px;bottom:22px;z-index:70;display:flex;align-items:center;gap:6px;font:700 12px var(--f);padding:11px 14px;border-radius:12px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;box-shadow:0 12px 30px -12px rgba(29,34,51,.6);transform:translateY(90px);opacity:0;transition:transform .45s cubic-bezier(.2,.7,.2,1),opacity .3s}
+.fab span{color:#8fa8ff}.fab b{font-weight:700}.fab i{width:7px;height:13px;background:var(--blue);animation:bl 1.1s steps(1) infinite}.fab.on{transform:none;opacity:1}
+#coinimg.flip{animation:flip .5s cubic-bezier(.2,.7,.2,1)}@keyframes flip{from{transform:perspective(900px) rotateY(-70deg) scale(.92);opacity:.3}}
+.term.land{animation:land 1.1s cubic-bezier(.2,.7,.2,1) both}@keyframes land{from{scale:1.18;filter:blur(8px);opacity:0}}
+@media (min-width:901px) and (min-height:681px){
+  .pin{height:310vh}.pin-in{position:sticky;top:64px;height:calc(100vh - 64px);display:flex;align-items:center;padding:0;overflow:hidden}.pin-in>.wrap{width:100%}
+  .htrack{display:flex;gap:18px}.htrack .s{flex:0 0 min(500px,44vw);opacity:.5;transform:scale(.96)}.htrack .s.on{opacity:1;transform:none}.hx{overflow:visible}
+  .ill{height:150px}.mslip{top:16px}
+}
+/* v2: hero field, world, board, palette, market */
+.hero{background:var(--paper);overflow:hidden}.hero>.wrap{position:relative;z-index:1}canvas.hfield{position:absolute;inset:0;z-index:0;pointer-events:none}
+.kbtn span{font-size:11px;letter-spacing:.02em}
+.wgrid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:26px;align-items:center}
+.globe{position:relative;aspect-ratio:1;width:100%;max-width:620px;margin:0 auto;touch-action:pan-y}.globe canvas{display:block;cursor:grab}
+.gtip{position:absolute;left:0;top:0;z-index:2;pointer-events:none;transform:translate(-50%,calc(-100% - 18px));background:var(--ink);color:var(--paper);border-radius:10px;padding:8px 11px;font-size:11.5px;line-height:1.45;width:max-content;max-width:250px;opacity:0;transition:opacity .25s;box-shadow:0 14px 28px -14px rgba(29,34,51,.7)}
+.gtip.on{opacity:1}.gtip small{display:block;color:#9aa6cc;font-size:10px;letter-spacing:.07em}.gtip b{color:#8fa8ff}.gtip b.r{color:#ff9b92}
+.gtip:after{content:"";position:absolute;left:50%;bottom:-5px;width:10px;height:10px;background:var(--ink);transform:translateX(-50%) rotate(45deg)}
+.gleg{position:absolute;left:0;bottom:0;display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--mute)}.gleg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}.gleg i.b{background:var(--blue)}.gleg i.r{background:var(--red)}
+.board{background:#1b1f2e;border-radius:16px;padding:16px 14px 12px;box-shadow:0 34px 64px -36px rgba(29,34,51,.75),inset 0 1px 0 rgba(255,255,255,.06);color:#ece6d6;min-width:0}
+.bh,.bf{display:flex;justify-content:space-between;font-size:11px;color:#8d95b3;letter-spacing:.06em}.bh{margin:0 4px 10px}.bf{margin:10px 4px 0;font-size:10.5px;color:#6f789a}
+.brow{display:flex;padding:4px;border-radius:7px;cursor:pointer;transition:background .2s;white-space:nowrap;overflow:hidden}.brow:hover,.brow.hl{background:rgba(255,255,255,.07)}
+.fc{display:inline-block;flex:0 0 auto;width:12px;height:22px;line-height:22px;margin-right:1px;text-align:center;font:700 11.5px var(--f);background:#2a3045;border-radius:2px;color:#ece6d6;position:relative}
+.fc:after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.5)}.fc.s{background:transparent}.fc.s:after{display:none}
+.fc.b{color:#8fa8ff}.fc.r{color:#ff9b92}.fc.m{color:#8d95b3}.fc.f{animation:flp .17s linear}
+@keyframes flp{0%{transform:perspective(140px) rotateX(0)}49%{transform:perspective(140px) rotateX(-88deg)}51%{transform:perspective(140px) rotateX(88deg)}100%{transform:perspective(140px) rotateX(0)}}
+.pal{position:fixed;inset:0;z-index:150;background:rgba(29,34,51,.26);backdrop-filter:blur(5px);display:flex;justify-content:center;align-items:flex-start;padding-top:12vh;opacity:0;transition:opacity .18s}.pal.on{opacity:1}
+.pbox{width:min(660px,calc(100% - 28px));background:var(--card);border:1px solid var(--ln2);border-radius:16px;box-shadow:0 44px 90px -34px rgba(29,34,51,.65);overflow:hidden;transform:translateY(-10px) scale(.98);transition:transform .22s cubic-bezier(.2,.7,.2,1)}.pal.on .pbox{transform:none}
+.pinp{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--ln)}.pinp>span{color:var(--blue);font-weight:800}.pinp input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:15px}
+kbd{font:500 10.5px var(--f);border:1px solid var(--ln2);border-bottom-width:2px;border-radius:6px;padding:1px 6px;color:var(--mute);background:var(--paper);margin-right:3px}
+.plist{max-height:min(420px,54vh);overflow:auto;padding:6px}
+.pi{display:grid;grid-template-columns:76px minmax(0,1fr) 52px;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:transparent;padding:10px;border-radius:10px;cursor:pointer;font-size:13px}.pi.on{background:rgba(63,109,255,.09)}
+.pi .pc{font-size:10px;color:var(--red);font-weight:700;letter-spacing:.05em;text-transform:uppercase}.pi .pq{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pi b{text-align:right;font-weight:800}.pi mark{background:rgba(63,109,255,.18);color:inherit;border-radius:3px}
+.pe{padding:24px;text-align:center;color:var(--mute);margin:0}.pft{display:flex;gap:16px;padding:10px 16px;border-top:1px solid var(--ln);font-size:11px;color:var(--mute);flex-wrap:wrap}
+.three{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) minmax(0,.92fr);gap:18px;align-items:start}
+.mh{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}.mp b{font:800 30px var(--f);letter-spacing:-.03em;color:var(--blue)}.mp em{font-style:normal;font-size:12px;font-weight:700;margin-left:8px}
+.tabs{display:flex;gap:3px;padding:3px;border:1px solid var(--ln);border-radius:9px;background:var(--paper)}.tabs button{border:0;background:transparent;font-size:11px;padding:5px 8px;border-radius:6px;cursor:pointer;color:var(--mute)}.tabs button.on{background:var(--ink);color:var(--paper)}
+.mchart{position:relative;height:156px;border-radius:10px;background:var(--paper);border:1px solid var(--ln);overflow:hidden;cursor:crosshair}.mchart svg{width:100%;height:100%;display:block}
+.mchart .ln{fill:none;stroke:var(--blue);stroke-width:2;vector-effect:non-scaling-stroke;stroke-dasharray:3000;stroke-dashoffset:3000;animation:draw 1.3s cubic-bezier(.3,.6,.2,1) forwards}.mchart .ar{fill:rgba(63,109,255,.1)}.mchart.no .ln{stroke:var(--red)}.mchart.no .ar{fill:rgba(232,72,59,.09)}
+.mx{position:absolute;top:0;bottom:0;width:1px;background:rgba(29,34,51,.28);opacity:0;pointer-events:none}.md{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px rgba(63,109,255,.2);opacity:0;pointer-events:none}
+.mtip{position:absolute;top:8px;font-size:11px;background:var(--ink);color:var(--paper);padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;transform:translateX(-50%);pointer-events:none}.mchart.hv .mx,.mchart.hv .md,.mchart.hv .mtip{opacity:1}
+.bkh{display:flex;justify-content:space-between}.obook{font-size:11.5px;border:1px solid var(--ln);border-radius:10px;overflow:hidden;background:var(--paper)}
+.bk{display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px 10px;position:relative}.bk span{position:relative;z-index:1}.bk span+span{text-align:right}
+.bk:before{content:"";position:absolute;top:1px;bottom:1px;right:0;width:var(--w,0);transition:width .6s cubic-bezier(.2,.7,.2,1)}
+.bk.a{color:var(--red)}.bk.a:before{background:rgba(232,72,59,.11)}.bk.bd{color:var(--blue)}.bk.bd:before{background:rgba(63,109,255,.11)}
+.bk.mid{color:var(--mute);background:var(--card);border-block:1px dashed var(--ln);font-size:10.5px}.bk.hd{color:var(--mute);font-size:10px;letter-spacing:.05em}
+@media (max-width:1180px){.three{grid-template-columns:1fr 1fr}.three>.panel:last-child{grid-column:1/-1}}
+@media (max-width:980px){.wgrid,.three{grid-template-columns:1fr}.globe{max-width:480px}}
+@media (max-width:620px){.kbtn{display:none}.fc{width:11px;height:19px;line-height:19px;font-size:10.5px;margin-right:1px}.board{padding:12px 8px 10px}}
+/* log */
+.log{border:1px solid var(--ln2);border-radius:16px;background:var(--card);overflow:hidden}
+#tape{max-height:440px;overflow:auto;font-size:12.5px}
+.tp{display:grid;grid-template-columns:56px 54px 48px 86px 52px minmax(0,1fr);gap:10px;padding:8px 16px;border-bottom:1px solid var(--paper2);align-items:center;cursor:pointer}.tp:hover{background:var(--paper)}
+.tp small{color:var(--mute)}.tp .s{font-weight:800}.tp em{font-style:normal;font-weight:700}.tp p{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
+.tp.new{animation:nw 2s cubic-bezier(.2,.7,.2,1)}@keyframes nw{from{background:rgba(63,109,255,.18);transform:translateX(-14px)}}.tp.whale{background:rgba(232,72,59,.05)}
+/* faq */
+.faq{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.faq details{border:1px solid var(--ln);border-radius:12px;background:var(--card);padding:0 18px}.faq details[open]{border-color:var(--ln2)}
+.faq summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:700;display:flex;justify-content:space-between;gap:10px}.faq summary::-webkit-details-marker{display:none}.faq summary:after{content:"+";color:var(--blue);font-size:18px;line-height:1}.faq details[open] summary:after{content:"−"}
+.faq p{margin:0 0 16px;color:var(--ink2);font-size:13px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;z-index:120;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:12px;transition:.25s;pointer-events:none}#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:980px){.hero .hg,.two,.lead{grid-template-columns:1fr}.lead .r{border-left:0;border-top:1px solid var(--ln)}.htrack{grid-template-columns:1fr 1fr}.faq{grid-template-columns:1fr}.top .wrap{grid-template-columns:auto 1fr;height:auto;padding-top:10px;padding-bottom:10px;row-gap:10px}.nav{grid-column:1/-1;grid-row:2;overflow-x:auto;max-width:100%}.stats{grid-template-columns:1fr 1fr}.stats div:nth-child(2){border-right:0}.stats div{border-bottom:1px solid var(--ln)}}
+@media (max-width:620px){.wrap{padding:0 16px}#out{height:340px}.htrack{grid-template-columns:1fr}.rail{display:none}.fab{right:12px;bottom:12px;padding:10px 12px}.fab b{display:none}.tp{grid-template-columns:48px 40px 34px 64px minmax(0,1fr);row-gap:2px}.tp p{grid-column:1/-1}.grid2{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv,.st{opacity:1;transform:none}.chart .ln,.spark .l,.mchart .ln{stroke-dashoffset:0}.chart .ar{opacity:1}.mslip{transform:rotate(-5deg)}.mslip em{opacity:1;transform:none}.stack i{transform:none}.dots i{background:var(--blue)}}
+</style>
+</head>
+<body>
+<div id="intro" aria-hidden="true"><canvas></canvas><i class="flash"></i><button class="skip" type="button">skip ›</button></div>
+<div class="prog"></div>
+<header class="top"><div class="wrap">
+  <a class="logo" href="#" aria-label="opm home">opm<i></i></a>
+  <nav class="nav"><a href="#world">world</a><a href="#wire">wire</a><a href="#bet">bet</a><a href="#launch">launch</a><a href="#how">how</a><a href="#log">log</a><a href="#faq">faq</a></nav>
+  <div class="right"><button class="btn ghost sm kbtn" id="kbtn" aria-label="Search every question"><span>⌘K</span></button><button class="btn sm" id="connect">connect</button></div>
+</div></header>
+<div class="tick" aria-label="Live questions"><b class="lv">LIVE</b><div class="sk" id="tsk"><div class="run" id="tick"><span>loading the wire…</span></div></div></div>
+
+<main>
+<section class="hero"><div class="wrap hg">
+  <div class="rv">
+    <div class="prompt">anon@opm-lab ~ %<i></i></div>
+    <h1 id="h1"><span data-t="onchain">onchain</span><br><em data-t="predictions">predictions</em></h1>
+    <p class="sub">bet with SOL on what happens next in the world, or launch a coin on it. live odds from the biggest prediction market, one terminal.</p>
+    <ul class="checks"><li>bet yes or no on world events, in SOL</li><li>launch a pump.fun coin on any event</li><li>every coin is born on one side: yes or no</li><li>everything signed in your own wallet</li></ul>
+    <div class="ctas"><a class="btn blue" href="#bet">bet with SOL</a><a class="btn ghost" href="#launch">launch a coin</a></div>
+  </div>
+  <div class="term rv" id="termbox">
+    <div class="tbar"><i></i><i></i><i></i><span>anon@opm-lab — zsh</span><em id="tlive">connecting…</em></div>
+    <div id="out" aria-live="polite"></div>
+    <div class="inrow"><label for="cmd">anon@opm-lab ~ %</label><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Type a command"></div>
+    <div class="chipsQ" id="chipsQ"><button data-c="help">help</button><button data-c="opm wire">opm wire</button><button data-c="opm wire crypto">opm wire crypto</button><button data-c="opm bet 1 yes 0.5">opm bet 1 yes 0.5</button><button data-c="opm launch 1">opm launch 1</button></div>
+  </div>
+</div>
+<div class="wrap"><div class="stats rv">
+  <div><i>LIVE QUESTIONS</i><b id="s-n">0</b></div><div><i>24H VOLUME</i><b id="s-v">$0</b><span class="cbar" id="s-cb"></span></div><div><i>BIGGEST MOVE TODAY</i><b id="s-m" style="font-size:16px">—</b></div><div><i>ENGINE</i><b style="font-size:16px;color:#c99c34">offline</b></div>
+</div></div></section>
+
+<div class="split" aria-hidden="true"><div class="sy" id="sy">YES · YES · YES · YES · YES · YES · YES · YES</div><div class="sn" id="sn">NO · NO · NO · NO · NO · NO · NO · NO · NO</div></div>
+
+<section class="blk" id="world" data-n="01"><div class="wrap">
+  <div class="hd rv"><div><div class="n"><b>01</b> · THE WORLD</div><h2><span class="ty" data-ty="% opm world --live">% opm world --live</span></h2></div><p>every live question, pinned where it's happening. a pin's height is its 24h volume, its colour the side the market leans to. crypto orbits.</p></div>
+  <div class="wgrid">
+    <div class="globe rv" id="globe"><div class="gtip" id="gtip"></div><div class="gleg"><span><i class="b"></i>leans yes</span><span><i class="r"></i>leans no</span><span>drag to turn · tap a pin</span></div></div>
+    <div class="board rv" id="board"><div class="bh"><span>% opm board --top</span><span id="bpg">·</span></div><div id="brows"></div><div class="bf"><span>tap a row to bet</span><span id="bclock"></span></div></div>
+  </div>
+</div></section>
+
+<section class="blk" id="wire" data-n="02"><div class="wrap">
+  <div class="hd rv"><div><div class="n"><b>02</b> · THE WIRE</div><h2><span class="ty" data-ty="% opm wire --live">% opm wire --live</span></h2></div><p>the world's biggest questions, priced live by real money. pick one to bet on it or launch a coin on it.</p></div>
+  <div class="wbar rv"><div id="chips" class="wbar" style="margin:0"></div><label class="search"><span>›</span><input id="q" placeholder="search: fed, bitcoin, ceasefire…" autocomplete="off"></label>
+    <select id="sort"><option value="vol">most traded</option><option value="move">biggest move</option><option value="end">ending soon</option><option value="odds">highest odds</option></select></div>
+  <div class="lead rv" id="lead"></div>
+  <div id="cards"><p class="empty">loading the wire…</p></div>
+</div></section>
+
+<section class="blk" id="bet" data-n="03"><div class="wrap">
+  <div class="hd rv"><div><div class="n"><b>03</b> · BET</div><h2><span class="ty" data-ty="% opm bet --side yes --sol 0.5">% opm bet --side yes --sol 0.5</span></h2></div><p>pick a question, pick a side, pay in SOL. your position lands in your own wallet. no account, no deposit.</p></div>
+  <div class="three">
+    <div class="panel rv"><div class="tbar"><i></i><i></i><i></i><span>bet slip</span></div><div class="body">
+      <div><span class="lbl">QUESTION</span><div class="pick"><b id="b-q">pick one on the wire</b><button class="btn sm ghost" id="b-change">change</button></div></div>
+      <div><span class="lbl">SIDE</span><div class="side"><button class="y on" data-s="yes">YES <small id="b-py">—</small></button><button class="n" data-s="no">NO <small id="b-pn">—</small></button></div></div>
+      <div><span class="lbl">AMOUNT</span><div class="amt"><input type="range" id="b-r" min="0.05" max="10" step="0.05" value="0.5"><input type="number" id="b-a" min="0.01" step="0.01" value="0.5"><span>SOL</span></div>
+        <div class="quick" style="margin-top:8px"><button data-a="0.1">0.1</button><button data-a="0.5">0.5</button><button data-a="1">1</button><button data-a="5">5</button></div></div>
+      <div class="sum"><div><span>price</span><b id="b-price">—</b></div><div id="b-sol" class="solp" hidden><span>buy price on Solana, live</span><i></i></div><div><span>you pay</span><b id="b-pay">—</b></div><div><span>shares</span><b id="b-sh">—</b></div><div class="win"><span>if it happens</span><b id="b-win">—</b></div><div id="b-min" class="warn" hidden><span>the minimum bet is about $5</span></div></div>
+      <button class="btn blue" id="b-go">connect wallet to bet</button>
+      <p class="note">prices are the market's live odds; 62¢ means 62%. a winning share pays $1, shares shown before fees. you can lose the whole amount. bets fill on Polymarket's markets through Jupiter on Solana and aren't available in the US or South Korea.</p>
+    </div></div>
+    <div class="panel rv" id="mkt"><div class="tbar"><i></i><i></i><i></i><span>market</span></div><div class="body">
+      <div class="mh"><div><span class="lbl" id="m-side">YES PRICE</span><div class="mp"><b id="m-px">—</b><em id="m-chg"></em></div></div><div class="tabs" id="m-tabs"><button data-r="1d">1D</button><button class="on" data-r="1w">1W</button><button data-r="1m">1M</button><button data-r="max">ALL</button></div></div>
+      <div class="mchart" id="m-wrap"><svg id="m-chart" viewBox="0 0 300 140" preserveAspectRatio="none"></svg><i class="mx" id="m-x"></i><i class="md" id="m-d"></i><div class="mtip" id="m-tip"></div></div>
+      <div><div class="bkh"><span class="lbl">ORDER BOOK</span><span class="lbl" id="m-spread"></span></div><div class="obook" id="m-book"><p class="empty">pick a question</p></div></div>
+    </div></div>
+    <div class="panel rv"><div class="tbar"><i></i><i></i><i></i><span>what happens when you sign</span></div><div class="body">
+      <ol class="steps" id="b-steps"><li>find the same market on Solana and quote your size</li><li>swap your SOL to USDC · your wallet signs</li><li>open the bet on your side · your wallet signs</li><li>the order fills at the market price</li><li>when it resolves, a winning share pays $1</li></ol>
+      <div class="slipbox" id="b-slipbox"><div class="slipp" id="b-slip"><h5>OPM</h5><div class="c">bet slip</div><hr><span class="q" id="s-q">—</span><div><span>side</span><b id="s-s">YES</b></div><div><span>stake</span><b id="s-a">0.5 SOL</b></div><div><span>price</span><b id="s-p">—</b></div><hr><div><span>pays if right</span><b id="s-w">—</b></div></div></div>
+    </div></div>
+  </div>
+</div></section>
+
+<section class="blk" id="launch" data-n="04"><div class="wrap">
+  <div class="hd rv"><div><div class="n"><b>04</b> · LAUNCH</div><h2><span class="ty" data-ty="% opm launch --market 1 --side yes">% opm launch --market 1 --side yes</span></h2></div><p>turn any question into a pump.fun coin that takes a side. the name, ticker and image come from the event; you can change all of it.</p></div>
+  <div class="two">
+    <div class="panel rv"><div class="tbar"><i></i><i></i><i></i><span>new coin</span></div><div class="body">
+      <div><span class="lbl">QUESTION</span><div class="pick"><b id="l-q">pick one on the wire</b><button class="btn sm ghost" id="l-change">change</button></div></div>
+      <div><span class="lbl">SIDE</span><div class="side"><button class="y on" data-s="yes">YES<small>the coin says it happens</small></button><button class="n" data-s="no">NO<small>the coin says it won't</small></button></div></div>
+      <div class="grid2"><label class="field"><span class="lbl">NAME</span><input id="l-name" maxlength="32"></label><label class="field"><span class="lbl">TICKER</span><input id="l-sym" maxlength="10"></label></div>
+      <label class="field"><span class="lbl">DESCRIPTION</span><textarea id="l-desc" rows="3" maxlength="400"></textarea></label>
+      <div class="grid2"><label class="field"><span class="lbl">X LINK (OPTIONAL)</span><input id="l-x" placeholder="https://x.com/…"></label><label class="field"><span class="lbl">FIRST BUY (SOL, OPTIONAL)</span><input id="l-buy" type="number" min="0" step="0.01" value="0"></label></div>
+      <button class="btn" id="l-go">connect wallet to launch</button>
+      <p class="note">a real pump.fun coin, created and signed in your own wallet. the mint key is made in your browser and never leaves it.</p>
+    </div></div>
+    <div class="panel rv"><div class="tbar"><i></i><i></i><i></i><span>coin image</span></div><div class="body">
+      <canvas id="coinimg" width="1024" height="1024"></canvas>
+      <div class="styles" id="l-style"><button class="on" data-s="slip">slip</button><button data-s="news">news</button><button data-s="poster">poster</button><button data-s="odds">odds</button></div>
+      <ol class="steps" id="l-steps"><li>the image and metadata go up</li><li>pump.fun builds the coin</li><li>your browser signs with the new mint key</li><li>your wallet signs and pays</li><li>the coin is live, with its side on it</li></ol>
+    </div></div>
+  </div>
+</div></section>
+
+<section class="blk pin" id="how"><div class="pin-in"><div class="wrap">
+  <div class="hd rv"><div><div class="n"><b>05</b> · HOW IT WORKS</div><h2><span class="ty" data-ty="% opm cycle --every 30m">% opm cycle --every 30m</span></h2></div><p>a coin launched on opm is born on a question and a side. its creator fees are meant to back that side, and what it wins goes to its holders.</p></div>
+  <div class="rail" aria-hidden="true"><i id="rail-fill"></i><b id="rail-dot"></b><span>launch</span><span>fees</span><span>back the side</span><span>holders</span></div>
+  <div class="hx"><div class="htrack" id="htrack">
+    <div class="s"><div class="no">01</div><div class="ill i1"><div class="mslip"><b>OPM</b><small>bet slip</small><i></i><em>YES</em></div></div><h4>launch</h4><p>a coin is born on a question and a side: yes or no. the name, ticker and image come from the event.</p><code>opm launch --side yes</code></div>
+    <div class="s"><div class="no">02</div><div class="ill i2"><div class="lane"><span class="b">buy</span><span class="r">sell</span><span class="b">buy</span><span class="b">buy</span><span class="r">sell</span><span class="b">buy</span></div><div class="book">book</div></div><h4>fees</h4><p>pump.fun pays a creator fee on every trade of the coin, buys and sells alike.</p><code>fees → the coin's book</code></div>
+    <div class="s"><div class="no">03</div><div class="ill i3"><div class="book">book</div><div class="arr"><i></i></div><div class="stack"><i></i><i></i><i></i><i></i><i></i></div><em>yes shares</em></div><h4>back the side</h4><p>the engine uses the book to buy the coin's side on the market, at the market's price.</p><code>book → yes shares</code></div>
+    <div class="s"><div class="no">04</div><div class="ill i4"><div class="dots"></div><em>holders</em></div><h4>holders</h4><p>if the side wins, the shares pay $1 each and the payout goes to the coin's holders.</p><code>winnings → holders, in SOL</code></div>
+  </div></div>
+  <div class="status rv"><b>engine offline</b><span>the engine that runs steps 02–04 isn't switched on yet. until it is, coins launch normally and bets go straight from your wallet.</span></div>
+</div></div></section>
+
+<section class="blk" id="log" data-n="06"><div class="wrap">
+  <div class="hd rv"><div><div class="n"><b>06</b> · LIVE</div><h2><span class="ty" data-ty="% tail -f world.log">% tail -f world.log</span></h2></div><p>the biggest bets landing on the world's questions right now. anything over $5,000 is a whale.</p></div>
+  <div class="log rv"><div class="tbar"><i></i><i></i><i></i><span id="tape-at">connecting…</span></div><div id="tape"><p class="empty">loading…</p></div></div>
+</div></section>
+
+<section class="blk" id="faq" data-n="07"><div class="wrap">
+  <div class="hd rv"><div><div class="n"><b>07</b> · FAQ</div><h2><span class="ty" data-ty="% man opm">% man opm</span></h2></div></div>
+  <div class="faq rv">
+    <details><summary>what is opm?</summary><p>an onchain prediction terminal. it shows the world's live questions with real odds, lets you bet on them with SOL from your own wallet, and lets you launch a pump.fun coin that takes a side on any of them.</p></details>
+    <details><summary>where do the odds come from?</summary><p>from Polymarket, the biggest prediction market, read live in your browser. a price is what traders pay right now: 62¢ means the market thinks 62%.</p></details>
+    <details><summary>how does a bet work?</summary><p>opm finds the same Polymarket market on Solana through Jupiter, swaps your SOL to USDC, then opens the order on your side. your wallet signs both steps and the shares sit in your wallet. the minimum is about $5.</p></details>
+    <details><summary>does opm hold my money?</summary><p>no. bets and launches are transactions your own wallet signs. opm never holds your SOL or your keys.</p></details>
+    <details><summary>what does it mean that a coin takes a side?</summary><p>a coin launched here is born on one question and one side. the plan is for its creator fees to back that side and for winnings to go to its holders. that engine isn't on yet; the site says so until it is.</p></details>
+    <details><summary>which wallets work?</summary><p>Phantom, Solflare and other Solana wallets in your browser. every bet and launch shows up in your wallet first, and nothing happens until you sign.</p></details>
+    <details><summary>can I lose?</summary><p>yes. if your side loses, the shares pay nothing. never bet more than you can lose.</p></details>
+    <details><summary>can everyone bet?</summary><p>no. bets aren't available in the US or South Korea, and prediction markets are restricted in other places too. check the rules where you live. opm does not help anyone get around them.</p></details>
+  </div>
+</div></section>
+</main>
+<div class="pal" id="pal" hidden><div class="pbox" role="dialog" aria-label="Search every question"><div class="pinp"><span>%</span><input id="pq" placeholder="search every live question…" autocomplete="off" spellcheck="false"><kbd>esc</kbd></div><div class="plist" id="pl"></div><div class="pft"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> bet</span><span><kbd>⇧</kbd><kbd>↵</kbd> launch</span><span><kbd>⌘K</kbd> anywhere</span></div></div></div>
+<button class="fab" id="fab" aria-label="Back to the terminal"><span>%</span><b>opm</b><i></i></button>
+<div id="toast" role="status"></div>
+<script type="module" src="app.js?v=2"></script>
+</body></html>
