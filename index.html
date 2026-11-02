@@ -40,11 +40,11 @@ html.intro-on #intro{display:block;position:fixed;inset:0;z-index:200;background
 .tick span{font-size:12px;color:var(--ink2)}.tick b{color:var(--blue);font-weight:700}.tick em{font-style:normal;color:var(--red)}
 @keyframes run{to{transform:translateX(-50%)}}@keyframes bl{50%{opacity:0}}
 /* hero */
-.hero{position:relative;z-index:1;padding:56px 0 30px}
+.hero{position:relative;z-index:1;padding:40px 0 56px;min-height:calc(100vh - 104px);display:flex;align-items:center}.hero>.hg{width:100%}
 .hero .hg{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:34px;align-items:center}
 .prompt{font-size:13px;color:var(--mute)}.prompt i{display:inline-block;width:8px;height:15px;background:var(--blue);vertical-align:-2px;margin-left:6px;animation:bl 1.1s steps(1) infinite}
-.hero h1{font:800 clamp(44px,6.4vw,84px)/.98 var(--f);letter-spacing:-.045em;margin:16px 0 18px}.hero h1 em{font-style:normal;color:var(--blue)}
-.hero p.sub{color:var(--ink2);max-width:470px;margin:0 0 22px;font-size:15px}
+.hero h1{font:800 clamp(44px,5.6vw,80px)/.96 var(--f);letter-spacing:-.045em;margin:0 0 22px}.hero h1 em{font-style:normal;color:var(--blue)}
+.hero p.sub{color:var(--ink2);max-width:470px;margin:0 0 30px;font-size:15.5px}
 .checks{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:8px}.checks li{display:flex;gap:10px;font-size:13.5px}.checks li:before{content:"✓";color:var(--blue);font-weight:800}
 .ctas{display:flex;gap:10px;flex-wrap:wrap}
 .term{background:var(--card);border:1px solid var(--ln2);border-radius:14px;box-shadow:0 30px 60px -30px rgba(29,34,51,.35),0 2px 0 rgba(255,255,255,.6) inset;overflow:hidden}
@@ -231,10 +231,9 @@ kbd{font:500 10.5px var(--f);border:1px solid var(--ln2);border-bottom-width:2px
 <main>
 <section class="hero"><div class="wrap hg">
   <div class="rv">
-    <div class="prompt">anon@opm-lab ~ %<i></i></div>
-    <h1 id="h1"><span data-t="onchain">onchain</span><br><em data-t="predictions">predictions</em></h1>
+        <h1 id="h1"><span data-t="onchain">onchain</span><br><em data-t="predictions">predictions</em></h1>
     <p class="sub">bet with SOL on what happens next in the world, or launch a coin on it. live odds from the biggest prediction market, one terminal.</p>
-    <ul class="checks"><li>bet yes or no on world events, in SOL</li><li>launch a pump.fun coin on any event</li><li>every coin is born on one side: yes or no</li><li>everything signed in your own wallet</li></ul>
+    
     <div class="ctas"><a class="btn blue" href="#bet">bet with SOL</a><a class="btn ghost" href="#launch">launch a coin</a></div>
   </div>
   <div class="term rv" id="termbox">
@@ -244,11 +243,9 @@ kbd{font:500 10.5px var(--f);border:1px solid var(--ln2);border-bottom-width:2px
     <div class="chipsQ" id="chipsQ"><button data-c="help">help</button><button data-c="opm wire">opm wire</button><button data-c="opm wire crypto">opm wire crypto</button><button data-c="opm bet 1 yes 0.5">opm bet 1 yes 0.5</button><button data-c="opm launch 1">opm launch 1</button></div>
   </div>
 </div>
-<div class="wrap"><div class="stats rv">
-  <div><i>LIVE QUESTIONS</i><b id="s-n">0</b></div><div><i>24H VOLUME</i><b id="s-v">$0</b><span class="cbar" id="s-cb"></span></div><div><i>BIGGEST MOVE TODAY</i><b id="s-m" style="font-size:16px">—</b></div><div><i>ENGINE</i><b style="font-size:16px;color:#c99c34">offline</b></div>
-</div></div></section>
+</section>
 
-<div class="split" aria-hidden="true"><div class="sy" id="sy">YES · YES · YES · YES · YES · YES · YES · YES</div><div class="sn" id="sn">NO · NO · NO · NO · NO · NO · NO · NO · NO</div></div>
+
 
 <section class="blk" id="world" data-n="01"><div class="wrap">
   <div class="hd rv"><div><div class="n"><b>01</b> · THE WORLD</div><h2><span class="ty" data-ty="% opm world --live">% opm world --live</span></h2></div><p>every live question, pinned where it's happening. a pin's height is its 24h volume, its colour the side the market leans to. crypto orbits.</p></div>
@@ -319,7 +316,6 @@ kbd{font:500 10.5px var(--f);border:1px solid var(--ln2);border-bottom-width:2px
     <div class="s"><div class="no">03</div><div class="ill i3"><div class="book">book</div><div class="arr"><i></i></div><div class="stack"><i></i><i></i><i></i><i></i><i></i></div><em>yes shares</em></div><h4>back the side</h4><p>the engine uses the book to buy the coin's side on the market, at the market's price.</p><code>book → yes shares</code></div>
     <div class="s"><div class="no">04</div><div class="ill i4"><div class="dots"></div><em>holders</em></div><h4>holders</h4><p>if the side wins, the shares pay $1 each and the payout goes to the coin's holders.</p><code>winnings → holders, in SOL</code></div>
   </div></div>
-  <div class="status rv"><b>engine offline</b><span>the engine that runs steps 02–04 isn't switched on yet. until it is, coins launch normally and bets go straight from your wallet.</span></div>
 </div></div></section>
 
 <section class="blk" id="log" data-n="06"><div class="wrap">
@@ -334,15 +330,14 @@ kbd{font:500 10.5px var(--f);border:1px solid var(--ln2);border-bottom-width:2px
     <details><summary>where do the odds come from?</summary><p>from Polymarket, the biggest prediction market, read live in your browser. a price is what traders pay right now: 62¢ means the market thinks 62%.</p></details>
     <details><summary>how does a bet work?</summary><p>opm finds the same Polymarket market on Solana through Jupiter, swaps your SOL to USDC, then opens the order on your side. your wallet signs both steps and the shares sit in your wallet. the minimum is about $5.</p></details>
     <details><summary>does opm hold my money?</summary><p>no. bets and launches are transactions your own wallet signs. opm never holds your SOL or your keys.</p></details>
-    <details><summary>what does it mean that a coin takes a side?</summary><p>a coin launched here is born on one question and one side. the plan is for its creator fees to back that side and for winnings to go to its holders. that engine isn't on yet; the site says so until it is.</p></details>
+    <details><summary>what does it mean that a coin takes a side?</summary><p>a coin launched here is born on one question and one side. the plan is for its creator fees to back that side and for winnings to go to its holders. that engine isn't switched on yet.</p></details>
     <details><summary>which wallets work?</summary><p>Phantom, Solflare and other Solana wallets in your browser. every bet and launch shows up in your wallet first, and nothing happens until you sign.</p></details>
     <details><summary>can I lose?</summary><p>yes. if your side loses, the shares pay nothing. never bet more than you can lose.</p></details>
-    <details><summary>can everyone bet?</summary><p>no. bets aren't available in the US or South Korea, and prediction markets are restricted in other places too. check the rules where you live. opm does not help anyone get around them.</p></details>
   </div>
 </div></section>
 </main>
 <div class="pal" id="pal" hidden><div class="pbox" role="dialog" aria-label="Search every question"><div class="pinp"><span>%</span><input id="pq" placeholder="search every live question…" autocomplete="off" spellcheck="false"><kbd>esc</kbd></div><div class="plist" id="pl"></div><div class="pft"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> bet</span><span><kbd>⇧</kbd><kbd>↵</kbd> launch</span><span><kbd>⌘K</kbd> anywhere</span></div></div></div>
 <button class="fab" id="fab" aria-label="Back to the terminal"><span>%</span><b>opm</b><i></i></button>
 <div id="toast" role="status"></div>
-<script type="module" src="app.js?v=3"></script>
+<script type="module" src="app.js?v=4"></script>
 </body></html>

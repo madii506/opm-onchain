@@ -62,7 +62,7 @@ function priceHist(tok, range = '1w') { const k = tok + range; if (!hist.has(k))
 function sparkPath(h, W = 100, H = 32, pad = 2) { const ys = h.map(p => p[1]), lo = Math.min(...ys), hi = Math.max(...ys), sp = Math.max(.01, hi - lo); return h.map(([, p], i) => `${(i / (h.length - 1) * W).toFixed(2)},${(H - pad - (p - lo) / sp * (H - pad * 2)).toFixed(2)}`).join(' '); }
 
 // ---------------------------------------------------------------- scroll: progress, reveals, staggers, typed headers, nav
-const prog = $('.prog'), tsk = $('#tsk'), sy = $('#sy'), sn = $('#sn'), split = $('.split'), heroL = $('.hero .hg > div:first-child'), fab = $('#fab');
+const prog = $('.prog'), tsk = $('#tsk'), heroL = $('.hero .hg > div:first-child'), fab = $('#fab');
 const pin = $('#how'), track = $('#htrack'), steps = $$('#htrack .s'), rf = $('#rail-fill'), rd = $('#rail-dot');
 const cl = (x, a, b) => Math.min(b, Math.max(a, x));
 let sq = false, lastY = scrollY, vel = 0, skT;
@@ -83,8 +83,6 @@ function onScroll() {
     tsk.style.transform = `skewX(${cl(-vel * .12, -9, 9).toFixed(2)}deg)`; clearTimeout(skT); skT = setTimeout(() => { vel = 0; tsk.style.transform = ''; }, 140);
     if (y < innerHeight * 1.3) { heroL.style.transform = `translate3d(0,${(y * .16).toFixed(1)}px,0)`; heroL.style.opacity = Math.max(0, 1 - y / (innerHeight * .85)).toFixed(3);
       const tb = $('#termbox'); if (!tb.matches(':hover')) tb.style.transform = y > 2 ? `translate3d(0,${(y * .06).toFixed(1)}px,0) rotate(${(y * .003).toFixed(3)}deg)` : ''; }
-    const r = split.getBoundingClientRect(); if (r.bottom > -60 && r.top < innerHeight + 60) { const k = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
-      sy.style.transform = `translate3d(${(-30 + k * 30).toFixed(2)}%,0,0)`; sn.style.transform = `translate3d(${(-6 - k * 30).toFixed(2)}%,0,0)`; }
   }
   pinStep(); fab.classList.toggle('on', y > innerHeight * 1.1);
   if (!reduce) for (const b of nums) { const r = b.getBoundingClientRect(); if (r.bottom > 0 && r.top < innerHeight) b.style.setProperty('--py', ((r.top - innerHeight / 2) * -.18).toFixed(1) + 'px'); }
@@ -114,11 +112,6 @@ $('#termbox').addEventListener('pointerleave', e => { e.currentTarget.style.tran
 $$('.ctas .btn, #b-go, #l-go').forEach(b => { b.addEventListener('pointermove', e => { if (reduce || e.pointerType !== 'mouse') return; const r = b.getBoundingClientRect(); b.style.transform = `translate(${((e.clientX - r.left) / r.width - .5) * 8}px,${((e.clientY - r.top) / r.height - .5) * 6 - 2}px)`; }); b.addEventListener('pointerleave', () => { b.style.transform = ''; }); });
 
 // ---------------------------------------------------------------- the ticker
-function splitFill() {
-  const top = EV.slice(0, 14); if (!top.length) return;
-  sy.innerHTML = top.map(e => `YES ${pct(e.lead.yes)}%`).join(' <em>·</em> ') + ' <em>·</em> ' + top.slice(0, 4).map(e => `YES ${pct(e.lead.yes)}%`).join(' <em>·</em> ');
-  sn.innerHTML = top.map(e => `NO ${pct(e.lead.no ?? 1 - e.lead.yes)}%`).join(' <em>·</em> ') + ' <em>·</em> ' + top.slice(0, 4).map(e => `NO ${pct(e.lead.no ?? 1 - e.lead.yes)}%`).join(' <em>·</em> ');
-}
 function ticker() {
   const items = EV.slice(0, 24).map(e => `<span>${esc(qOf(e))} <b>${pct(e.lead.yes)}% yes</b>${e.lead.d1 ? ` <em class="${e.lead.d1 > 0 ? 'up' : 'dn'}">${e.lead.d1 > 0 ? '▲' : '▼'}${Math.abs(e.lead.d1 * 100).toFixed(1)}</em>` : ''}</span>`).join('');
   $('#tick').innerHTML = items + items;
@@ -234,16 +227,7 @@ async function lead() {
 }
 $('#lead').addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (!b) return; const ev = BY.get($('#lead').dataset.id); if (!ev) return;
   if (b.dataset.a === 'launch') { setLaunch(ev, 'yes'); $('#launch').scrollIntoView({ behavior: 'smooth' }); } else { setBet(ev, b.dataset.a); $('#bet').scrollIntoView({ behavior: 'smooth' }); } });
-function stats() {
-  countUp($('#s-n'), EV.reduce((s, e) => s + e.ms.length, 0), x => Math.round(x).toLocaleString());
-  countUp($('#s-v'), EV.reduce((s, e) => s + e.v24, 0), usd);
-  const CC = { politics: '#3f6dff', crypto: '#7d99ff', sports: '#b9c8ff', world: '#e8483b', tech: '#1d2233', culture: '#f0a39b', economy: '#6b7391' }, by = {};
-  EV.forEach(e => by[e.cats[0]] = (by[e.cats[0]] || 0) + e.v24);
-  $('#s-cb').innerHTML = Object.entries(by).sort((a, c) => c[1] - a[1]).map(([c, v]) => `<i style="flex-grow:${v.toFixed(0)};background:${CC[c] || '#cbc3b0'}" title="${c} · ${usd(v)}"></i>`).join('');
-  $('#tlive').innerHTML = `<b>●</b> ${EV.reduce((s, e) => s + e.ms.length, 0).toLocaleString()} live${solUsd ? ' · SOL $' + solUsd.toFixed(2) : ''}`;
-  let mv = null; for (const e of EV) if (e.lead.v24 > 2000 && e.lead.yes > .03 && e.lead.yes < .97 && (!mv || Math.abs(e.lead.d1) > Math.abs(mv.lead.d1))) mv = e;
-  $('#s-m').innerHTML = mv && mv.lead.d1 ? `<span class="${mv.lead.d1 > 0 ? 'up' : 'dn'}">${mv.lead.d1 > 0 ? '▲' : '▼'} ${Math.abs(mv.lead.d1 * 100).toFixed(1)} pts</span><small title="${esc(qOf(mv))}">${esc(qOf(mv))}</small>` : 'quiet';
-}
+function stats() { $('#tlive').innerHTML = `<b>●</b> ${EV.reduce((s, e) => s + e.ms.length, 0).toLocaleString()} live${solUsd ? ' · SOL $' + solUsd.toFixed(2) : ''}`; }
 
 // ---------------------------------------------------------------- the world: a globe of pins (world.js, loaded when you get close) and the board
 let G = null; const gtip = $('#gtip'); let tipFor = null;
@@ -557,7 +541,7 @@ $('#tape').addEventListener('click', e => { const r = e.target.closest('.tp[data
 async function refresh() {
   try {
     EV = await load(); BY = new Map(EV.map(e => [e.id, e]));
-    ticker(); splitFill(); chips(); cards(); lead(); stats(); boardRender(!BD.drawn); BD.drawn = true; if (G) G.update(EV); onScroll();
+    ticker(); chips(); cards(); lead(); stats(); boardRender(!BD.drawn); BD.drawn = true; if (G) G.update(EV); onScroll();
     if (!bet.e && EV[0]) setBet(EV.find(x => x.ms.length === 1) || EV[0], 'yes');
     if (!L.e && EV[0]) setLaunch(EV.find(x => x.ms.length === 1) || EV[0], 'yes');
     tape();
@@ -571,7 +555,7 @@ async function sol() {
 async function intro() {
   const el = $('#intro'), H = document.documentElement; if (!el) return;
   if (!H.classList.contains('intro-on')) { el.remove(); return; }
-  try { const mod = await Promise.race([import('./intro.js?v=3'), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 8000))]); await mod.playIntro(el, () => EV); }
+  try { const mod = await Promise.race([import('./intro.js?v=4'), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 8000))]); await mod.playIntro(el, () => EV); }
   catch { el.classList.add('out'); }
   $('#termbox').classList.add('land'); setTimeout(() => { H.classList.remove('intro-on'); el.remove(); }, 850);
 }
