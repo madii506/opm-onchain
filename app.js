@@ -555,7 +555,7 @@ async function sol() {
 async function intro() {
   const el = $('#intro'), H = document.documentElement; if (!el) return;
   if (!H.classList.contains('intro-on')) { el.remove(); return; }
-  try { const mod = await Promise.race([import('./intro.js?v=5'), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 8000))]); await mod.playIntro(el, () => EV); }
+  try { const mod = await Promise.race([import('./intro.js?v=6'), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 8000))]); await mod.playIntro(el, () => EV); }
   catch { el.classList.add('out'); }
   $('#termbox').classList.add('land'); setTimeout(() => { H.classList.remove('intro-on'); el.remove(); }, 850);
 }

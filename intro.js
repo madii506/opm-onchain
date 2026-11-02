@@ -1,8 +1,8 @@
-// The way in. A screen lights up on the world: a dotted globe where every live question is pinned in the city it's
-// happening in, the odds rising off the pins. A bet goes in and stamps. The camera pulls back out of the screen: it's
-// a beige PC standing on top of the world, the whole planet below it pinned with live questions, rings of odds in orbit.
-// It swoops back in and throws you through a tunnel of live numbers into the terminal.
-// About 10 s, no captions. Click, tap, Esc, Enter or "skip" skips it. Once per session; ?intro forces it; ?introt=T freezes.
+// The way in. It opens high over the world: a dotted planet with every live question pinned in the city it's
+// happening in, rings of odds in orbit, and a beige PC standing on top of it all. The camera comes down to the PC,
+// whose screen shows the same world; a bet goes in and stamps. Then it swings to the front and throws you through a
+// tunnel of live numbers into the terminal.
+// About 8.5 s, no captions. Click, tap, Esc, Enter or "skip" skips it. Once per session; ?intro forces it; ?introt=T freezes.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -36,7 +36,7 @@ function tag(text, { size = 44, color = INK, bg = 'rgba(251,250,246,.94)', sub =
 }
 
 // the timeline (seconds)
-const T_GLOBE = .45, T_BET = 3.2, T_STAMP = 3.95, T_BACK = 4.35, T_WIDE = 6.9, T_TERM = 6.3, T_ALIGN = 8.45, T_DIVE = 9.05, T_END = 10.2;
+const T_NEAR = 3.4, T_BET = 3.5, T_STAMP = 4.2, T_TERM = 5.15, T_ALIGN = 6.55, T_DIVE = 7.15, T_END = 8.35;
 
 export async function playIntro(el, getLive) {
   try { sessionStorage.setItem('opm:intro', '1'); } catch {}
@@ -49,7 +49,7 @@ export async function playIntro(el, getLive) {
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const scene = new THREE.Scene();
   const sky = cv(4, 256), skg = sky.getContext('2d'), sgr = skg.createLinearGradient(0, 0, 0, 256); sgr.addColorStop(0, '#eef2fd'); sgr.addColorStop(.55, '#cdd7f4'); sgr.addColorStop(1, '#a9b8e2'); skg.fillStyle = sgr; skg.fillRect(0, 0, 4, 256);
-  scene.background = tx(sky); scene.fog = new THREE.Fog(0xc6d1f1, 10, 30);
+  scene.background = tx(sky); scene.fog = new THREE.Fog(0xc6d1f1, 15, 40);
   const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), .04).texture; scene.environmentIntensity = .35;
   const std = o => new THREE.MeshStandardMaterial(o);
   const mesh = (geo, mat, x = 0, y = 0, z = 0, parent = scene) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; parent.add(m); return m; };
@@ -153,7 +153,7 @@ export async function playIntro(el, getLive) {
       const bm = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, H, 8), m); bm.position.y = H / 2; G.add(bm);
       const bh = new THREE.Mesh(new THREE.SphereGeometry(.07, 14, 12), m); bh.position.y = H; G.add(bh);
       const br = new THREE.Mesh(new THREE.RingGeometry(.06, .095, 32), new THREE.MeshBasicMaterial({ color: col, transparent: true, side: THREE.DoubleSide, depthWrite: false })); br.rotation.x = -Math.PI / 2; br.position.y = .01; G.add(br);
-      pinsBig.userData.items = (pinsBig.userData.items || []).concat({ ring: br, ph: Math.random() });
+      G.scale.setScalar(.001); pinsBig.userData.items = (pinsBig.userData.items || []).concat({ ring: br, ph: Math.random(), G, born: .25 + idx * .045 });
     });
     // the orbits carry the numbers
     const words = []; L.filter(e => e.lead.yes > .03 && e.lead.yes < .97).slice(0, 14).forEach(e => { const p = Math.round(e.lead.yes * 100); words.push([`YES ${p}%`, BLUE], [`NO ${100 - p}%`, RED]); });
@@ -177,31 +177,22 @@ export async function playIntro(el, getLive) {
   const NOISE = [0, 1, 2].map(() => { const c = cv(256, 192), g = c.getContext('2d'), d = g.createImageData(256, 192); for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255 | 0; d.data[i] = v; d.data[i + 1] = v; d.data[i + 2] = v + 10; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); return c; });
   let ST = null;
   const stories = () => { if (!ST) { const s = live().slice(0, 8).map(e => ({ q: qOf(e), yes: e.lead.yes })); if (s.length) ST = s; } return ST || [{ q: 'the world is placing its bets', yes: null }]; };
-  function powerOn(T) {                                   // a CRT warming up: a dot, a line, the full raster
-    const g = sx, W = 1024, H = 768; g.fillStyle = '#05060a'; g.fillRect(0, 0, W, H);
-    const k1 = easeOut(clamp(T / .14)), k2 = easeOut(clamp((T - .14) / .22)), w = W * k1, h = Math.max(3, H * k2);
-    const r = g.createLinearGradient(0, H / 2 - h / 2, 0, H / 2 + h / 2); r.addColorStop(0, 'rgba(230,236,255,0)'); r.addColorStop(.5, 'rgba(250,252,255,1)'); r.addColorStop(1, 'rgba(230,236,255,0)');
-    g.fillStyle = k2 > 0 ? r : '#fff'; g.fillRect((W - w) / 2, H / 2 - h / 2, w, h);
-    if (T > .32) { g.globalAlpha = clamp((T - .32) / .13); g.fillStyle = '#eef2fd'; g.fillRect(0, 0, W, H); g.globalAlpha = 1; }
-    sx.fillStyle = 'rgba(20,30,70,.035)'; for (let y = 0; y < H; y += 4) sx.fillRect(0, y, W, 2); scrTex.needsUpdate = true;
-  }
   function overlay(T) {                                   // over the world: the bet typed in, then the stamp
     const g = ox, W = 1024, H = 768; g.clearRect(0, 0, W, H);
-    if (T < T_GLOBE + .35) { g.fillStyle = `rgba(250,252,255,${1 - clamp((T - T_GLOBE) / .35)})`; g.fillRect(0, 0, W, H); }
     g.fillStyle = 'rgba(20,30,70,.03)'; for (let y = 0; y < H; y += 4) g.fillRect(0, y, W, 2);
     g.font = `700 24px ${F}`; g.fillStyle = INK; g.fillText('opm', 46, 132); g.fillStyle = BLUE; g.fillRect(104, 112, 10, 24);
     g.font = `400 21px ${F}`; g.fillStyle = MUTE; g.fillText('world · live', 128, 131);
     if (Math.floor(T * 1.6) % 2 === 0) { g.fillStyle = RED; g.beginPath(); g.arc(W - 128, 124, 8, 0, 7); g.fill(); } g.font = `700 22px ${F}`; g.fillStyle = RED; g.fillText('LIVE', W - 112, 132);
     if (T < T_BET - .25) { overTex(); return; }
-    const y = 560, cmd = 'opm bet --side yes --sol 0.5', t = T - T_BET, nn = t > 0 ? Math.floor(clamp(t / .62) * cmd.length) : 0, placed = T >= T_STAMP, a = clamp((T - T_BET + .25) / .25);
-    g.globalAlpha = a; g.fillStyle = 'rgba(251,252,255,.96)'; g.beginPath(); g.roundRect(56, y, W - 112, 76, 14); g.fill(); g.strokeStyle = placed ? BLUE : '#c9d3ef'; g.lineWidth = 3; g.stroke();
-    g.font = `400 28px ${F}`; g.fillStyle = MUTE; g.fillText('%', 82, y + 48); g.fillStyle = INK; const typed = cmd.slice(0, nn); g.fillText(typed, 120, y + 48);
-    if (!placed && Math.floor(T * 3) % 2 === 0) { g.fillStyle = BLUE; g.fillRect(124 + g.measureText(typed).width, y + 22, 15, 32); }
-    if (placed) { g.font = `700 28px ${F}`; g.fillStyle = BLUE; g.textAlign = 'right'; g.fillText('✓ placed', W - 84, y + 48); g.textAlign = 'left'; }
+    const y = 590, cmd = 'opm bet --side yes --sol 0.5', t = T - T_BET, nn = t > 0 ? Math.floor(clamp(t / .62) * cmd.length) : 0, placed = T >= T_STAMP, a = clamp((T - T_BET + .25) / .25);
+    g.globalAlpha = a; g.fillStyle = 'rgba(251,252,255,.97)'; g.beginPath(); g.roundRect(44, y, W - 88, 92, 16); g.fill(); g.strokeStyle = placed ? BLUE : '#c9d3ef'; g.lineWidth = 4; g.stroke();
+    g.font = `400 36px ${F}`; g.fillStyle = MUTE; g.fillText('%', 72, y + 58); g.fillStyle = INK; const typed = cmd.slice(0, nn); g.fillText(typed, 118, y + 58);
+    if (!placed && Math.floor(T * 3) % 2 === 0) { g.fillStyle = BLUE; g.fillRect(124 + g.measureText(typed).width, y + 24, 19, 42); }
+    if (placed) { g.font = `700 34px ${F}`; g.fillStyle = BLUE; g.textAlign = 'right'; g.fillText('✓ placed', W - 72, y + 58); g.textAlign = 'left'; }
     g.globalAlpha = 1;
     if (placed) {
       const k = clamp((T - T_STAMP) / .16), s = 2.6 - 1.6 * backOut(k);
-      g.save(); g.translate(W / 2, 380); g.rotate(-.12); g.scale(s, s); g.globalAlpha = clamp(k * 2.2) * .95;
+      g.save(); g.translate(W / 2, 360); g.rotate(-.12); g.scale(s * 1.2, s * 1.2); g.globalAlpha = clamp(k * 2.2) * .95;
       g.fillStyle = 'rgba(251,252,255,.55)'; g.beginPath(); g.roundRect(-250, -86, 500, 172, 18); g.fill();
       g.strokeStyle = BLUE; g.lineWidth = 10; g.beginPath(); g.roundRect(-250, -86, 500, 172, 18); g.stroke(); g.lineWidth = 3; g.beginPath(); g.roundRect(-236, -72, 472, 144, 12); g.stroke();
       g.fillStyle = BLUE; g.textAlign = 'center'; g.font = `800 76px ${F}`; g.fillText('BET PLACED', 0, 14); g.font = `700 26px ${F}`; g.fillText('YES · 0.5 SOL · ✓', 0, 56); g.restore();
@@ -236,12 +227,12 @@ export async function playIntro(el, getLive) {
     if (!built) build();
     const items = pins.userData.items || [];
     for (const it of items) { const k = clamp((T - it.born) / .35); it.g.scale.setScalar(Math.max(.001, backOut(k))); const p = ((T * .62) + it.born) % 1; it.ring.scale.setScalar(1 + p * 2.6); it.ring.material.opacity = (1 - p) * .9 * k; }
-    const seg = (T_BACK - .7) / Math.max(1, tour.length), ti = Math.min(tour.length - 1, Math.floor((T - .7) / seg)), cur = T > .7 && tour.length ? tour[Math.max(0, ti)] : null;
+    const seg = (T_TERM - .9) / Math.max(1, tour.length), ti = Math.min(tour.length - 1, Math.floor((T - .7) / seg)), cur = T > .7 && tour.length ? tour[Math.max(0, ti)] : null;
     if (cur) { const p = cur.g.position.clone().add(V(0, cur.h, 0).applyQuaternion(cur.g.quaternion)), ty = Math.atan2(-p.x, p.z), tp = Math.max(-.6, Math.min(.6, Math.atan2(p.y, Math.hypot(p.x, p.z))));
       let d = ty - gyaw; d = Math.atan2(Math.sin(d), Math.cos(d)); const f = DEBUG ? 1 : .06; gyaw += d * f; gpitch += (tp - gpitch) * f; }
     else gyaw += .004;
     globe.rotation.set(gpitch, gyaw, 0);
-    const z = 4.45 - .4 * easeOut(clamp(T / T_BACK)); gcam.position.set(0, -.05, z); gcam.lookAt(0, -.02, 0);
+    const z = 4.45 - .4 * easeOut(clamp(T / T_TERM)); gcam.position.set(0, -.05, z); gcam.lookAt(0, -.02, 0);
     tour.forEach((it, i) => { const on = it === cur, lt = (T - .7) - i * seg, k = on ? easeOut(clamp(lt / .3)) : lt >= seg ? Math.max(0, 1 - clamp((lt - seg) / .2)) : 0;
       it.head.getWorldPosition(wp); const sc = .105 * k; it.label.scale.set(sc * it.label.userData.aspect, sc, 1); it.label.position.copy(wp).add(V(.05, .05, .1)); });
     risers.forEach(r => { const k = ((T * .5 + r.ph) % 1), it = r.it; if (!it || it.g.scale.x < .5) { r.s.scale.set(.0001, .0001, 1); return; } it.head.getWorldPosition(wp);
@@ -265,17 +256,15 @@ export async function playIntro(el, getLive) {
 
   // ---------------------------------------------------------------- camera and post
   const cam = new THREE.PerspectiveCamera(aspect < 1 ? 62 : 40, aspect, .02, 80);
-  const fov0 = cam.fov, SCR = V(0, .595, .07), tanV = Math.tan(THREE.MathUtils.degToRad(fov0 / 2));
-  const dNear = aspect >= 1 ? Math.max(.6 * .49 / (tanV * aspect), .45 * .37 / tanV) : .6 * .53 / (tanV * aspect);
-  const near = V(0, .595, .084 + dNear), wide = aspect < 1 ? V(5.4, 4.0, 11.2) : V(4.7, 3.2, 8.7);
-  const out1 = new THREE.CatmullRomCurve3([near.clone(), V(0, .72, 1.55), V(1.5, 1.9, 3.9), wide], false, 'centripetal');
-  const look1 = new THREE.CatmullRomCurve3([SCR.clone(), V(0, .42, 0), V(0, -.4, 0), V(0, -1.35, 0)], false, 'centripetal');
+  const fov0 = cam.fov, SCR = V(0, .595, .07);
+  const sky0 = aspect < 1 ? V(8.5, 9.5, 17) : V(7.2, 8.2, 14.5), wide = aspect < 1 ? V(5.4, 4.0, 11.2) : V(4.7, 3.2, 8.7);
+  const nearP = aspect < 1 ? V(1.0, 1.0, 2.6) : V(1.05, .92, 1.78), betP = aspect < 1 ? V(.45, .82, 2.1) : V(.5, .76, 1.28);
+  const down1 = new THREE.CatmullRomCurve3([sky0, wide, V(2.4, 1.6, 3.9), nearP], false, 'centripetal');
+  const downL = new THREE.CatmullRomCurve3([V(0, -2.2, 0), V(0, -1.35, 0), V(0, .05, 0), V(0, .52, .06)], false, 'centripetal');
   const alignP = V(0, .62, aspect < 1 ? 1.1 : .66);
-  const in1 = new THREE.CatmullRomCurve3([wide.clone(), V(2.0, 2.0, 4.4), V(.6, .9, 1.8), alignP], false, 'centripetal');
-  const look2 = new THREE.CatmullRomCurve3([V(0, -1.35, 0), V(0, -.2, 0), V(0, .45, 0), SCR.clone()], false, 'centripetal');
   const look = V(0, 0, 0), wp = V(0, 0, 0);
   const composer = new EffectComposer(renderer), rp = new RenderPass(scene, cam); composer.addPass(rp);
-  const bokeh = new BokehPass(scene, cam, { focus: dNear, aperture: .002, maxblur: .006 }); bokeh.enabled = !small; composer.addPass(bokeh);
+  const bokeh = new BokehPass(scene, cam, { focus: 10, aperture: .002, maxblur: .006 }); bokeh.enabled = !small; composer.addPass(bokeh);
   composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), .22, .45, .92));
   const rgb = new ShaderPass(RGBShiftShader); rgb.uniforms.amount.value = 0; composer.addPass(rgb);
   const vig = new ShaderPass(VignetteShader); vig.uniforms.offset.value = .6; vig.uniforms.darkness.value = 1; composer.addPass(vig);
@@ -301,32 +290,31 @@ export async function playIntro(el, getLive) {
       const T = DEBUG ? +DEBUG : (now - t0) / 1000;
       if (!built) build();
       // the screen
-      if (T < T_GLOBE) { powerOn(T); setMap('canvas'); over.visible = false; }
-      else if (T < T_TERM) { drawWorld(T); overlay(T); setMap('world'); over.visible = true; }
+      if (T < T_TERM) { drawWorld(T); overlay(T); setMap('world'); over.visible = true; }
       else { drawTerm(T); setMap('canvas'); over.visible = false; }
       // the world below and around
       planet.rotation.y = -.25 + T * .035;
-      for (const it of pinsBig.userData.items || []) { const p = (T * .55 + it.ph) % 1; it.ring.scale.setScalar(1 + p * 2.4); it.ring.material.opacity = (1 - p) * .85; }
+      for (const it of pinsBig.userData.items || []) { const p = (T * .55 + it.ph) % 1; it.ring.scale.setScalar(1 + p * 2.4); it.ring.material.opacity = (1 - p) * .85; it.G.scale.setScalar(Math.max(.001, backOut(clamp((T - it.born) / .4)))); }
       for (const o of orbitTags) { const a = o.a + T * o.sp, r = o.g.userData.r; o.s.position.set(Math.cos(a) * r, 0, Math.sin(a) * r); }
       ringMat.opacity = .35 + .25 * Math.sin(T * 3);
       for (let i = 0; i < DUST; i++) { const s = dseed[i]; dpos[i * 3] = base[i * 3] + Math.sin(T * .3 + s) * .08; dpos[i * 3 + 1] = base[i * 3 + 1] + Math.sin(T * .22 + s * 1.7) * .06 + T * .02; dpos[i * 3 + 2] = base[i * 3 + 2] + Math.cos(T * .25 + s) * .08; }
-      dgeo.attributes.position.needsUpdate = true; dust.visible = T > T_BACK; glass.material.opacity = .05 * clamp((T - T_BACK) / .5);
-      glow.intensity = T < T_GLOBE ? .4 * clamp((T - .2) / .25) : .4 + (T >= T_STAMP && T < T_STAMP + .3 ? .6 * (1 - (T - T_STAMP) / .3) : 0);
+      dgeo.attributes.position.needsUpdate = true; glass.material.opacity = .05;
+      glow.intensity = .4 + (T >= T_STAMP && T < T_STAMP + .3 ? .6 * (1 - (T - T_STAMP) / .3) : 0);
       const down = T > T_STAMP - .14 && T < T_STAMP + .08; yesKey.position.y = down ? .012 : .022; yesMat.emissiveIntensity = T > T_STAMP - .14 && T < T_STAMP + .9 ? .9 * (1 - clamp((T - T_STAMP) / .9)) : 0;
       ledA.visible = !(T > T_STAMP && T < T_STAMP + 1.2 && Math.floor(T * 10) % 2);
-      // camera: on the screen, the stamp shakes it, out to the PC and up over the world, back in, then the dive
+      // camera: down from the sky to the PC, a slow push in while the bet goes through, round to the front, the dive
       let fov = fov0;
-      if (T < T_BACK) { cam.position.set(Math.sin(T * .4) * .004, near.y, near.z - (T / T_BACK) * .03); look.copy(SCR);
-        if (T > T_STAMP) { const a = .007 * (1 - clamp((T - T_STAMP) / .33)); cam.position.x += Math.sin(T * 95) * a; cam.position.y += Math.cos(T * 77) * a; } }
-      else if (T < T_WIDE) { const k = ease(clamp((T - T_BACK) / (T_WIDE - T_BACK))); out1.getPointAt(k, cam.position); look1.getPointAt(k, look); }
-      else if (T < T_ALIGN) { const k = ease(clamp((T - T_WIDE) / (T_ALIGN - T_WIDE))); in1.getPointAt(k, cam.position); look2.getPointAt(k, look); }
+      if (T < T_NEAR) { const k = ease(clamp(T / T_NEAR)); down1.getPointAt(k, cam.position); downL.getPointAt(k, look); }
+      else if (T < T_TERM) { const k = ease(clamp((T - T_NEAR) / (T_TERM - T_NEAR))); cam.position.lerpVectors(nearP, betP, k); look.lerpVectors(V(0, .52, .06), SCR, k);
+        if (T > T_STAMP) { const a = .012 * (1 - clamp((T - T_STAMP) / .33)); cam.position.x += Math.sin(T * 95) * a; cam.position.y += Math.cos(T * 77) * a; } }
+      else if (T < T_ALIGN) { const k = ease(clamp((T - T_TERM) / (T_ALIGN - T_TERM))); cam.position.lerpVectors(betP, alignP, k); look.copy(SCR); }
       else { const k = clamp((T - T_ALIGN) / (T_DIVE - T_ALIGN)), e = k * k * k; cam.position.lerpVectors(alignP, V(0, .595, .13), e); look.copy(SCR); fov = fov0 + 26 * e; }
       cam.lookAt(look); if (cam.fov !== fov) { cam.fov = fov; cam.updateProjectionMatrix(); }
-      bokeh.uniforms.focus.value = cam.position.distanceTo(V(0, .45, .06)); bokeh.uniforms.aperture.value = T > T_BACK && T < T_ALIGN ? .0022 : .001;
-      const passGlass = T > T_BACK && T < T_BACK + .6 ? Math.sin(clamp((T - T_BACK) / .6) * Math.PI) : 0, dive = T > T_ALIGN ? clamp((T - T_ALIGN) / (T_DIVE - T_ALIGN)) : 0;
-      rgb.uniforms.amount.value = .0035 * passGlass + .012 * dive * dive + (T > T_GLOBE - .1 && T < T_GLOBE + .25 ? .004 : 0); rgb.uniforms.angle.value = T * .7;
+      bokeh.uniforms.focus.value = cam.position.distanceTo(V(0, .45, .06)); bokeh.uniforms.aperture.value = T < T_ALIGN ? .0022 : .001;
+      const dive = T > T_ALIGN ? clamp((T - T_ALIGN) / (T_DIVE - T_ALIGN)) : 0, chan = T > T_TERM && T < T_TERM + .18 ? .004 : 0;
+      rgb.uniforms.amount.value = .012 * dive * dive + chan; rgb.uniforms.angle.value = T * .7;
       const f1 = T > T_DIVE - .12 ? (T < T_DIVE + .08 ? clamp((T - (T_DIVE - .12)) / .12) : 1 - clamp((T - T_DIVE - .08) / .22)) : 0, f2 = clamp((T - (T_END - .35)) / .3);
-      flash.style.opacity = Math.max(f1, f2).toFixed(3);
+      flash.style.opacity = Math.max(f1, f2, 1 - clamp(T / .5)).toFixed(3);
       if (T >= T_DIVE) {
         if (!tunBuilt) buildTunnel(); if (!inTunnel) { inTunnel = true; rp.scene = tun; rp.camera = tcam; bokeh.enabled = false; }
         const k = clamp((T - T_DIVE) / (T_END - T_DIVE)); tcam.position.set(Math.sin(k * 3) * .25, Math.cos(k * 2.4) * .18, 3 - 46 * k * k * (3 - 2 * k)); tcam.rotation.z = k * .6; tcam.fov = 78 - 18 * k; tcam.updateProjectionMatrix();
